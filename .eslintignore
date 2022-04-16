@@ -1,6 +1,4 @@
-.env
-target/
 aws/stack.js
 node_modules/
-bootstrap.zip
+target/
 cdk.out/

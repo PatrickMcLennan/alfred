@@ -5,8 +5,8 @@ use std::collections::HashMap;
 pub struct HtmlParser {}
 
 impl HtmlParser {
-  pub fn parse_reddit_images(string_http_response: &str) -> HashMap<String, RedditImagePost> {
-    let document = Html::parse_document(string_http_response);
+  pub fn parse_reddit_images(string_http_response: String) -> HashMap<String, RedditImagePost> {
+    let document = Html::parse_document(&string_http_response);
     let post_selector = Selector::parse("div.thing").unwrap(); 
     let thumbnail_selector = Selector::parse("a.thumbnail[data-event-action='thumbnail'] > img").unwrap();
     let mut posts: HashMap<String, RedditImagePost> = HashMap::new();
