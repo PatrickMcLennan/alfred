@@ -1,0 +1,1 @@
+export { Wallpapers } from './Wallpapers';

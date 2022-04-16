@@ -4,3 +4,4 @@ aws/stack.js
 node_modules/
 bootstrap.zip
 cdk.out/
+ui/dist/
