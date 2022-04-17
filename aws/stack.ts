@@ -17,7 +17,7 @@ const dynamoTableName = process?.env?.COLLECTOR_DYNAMODB ?? ``;
 const blurhashQueueName = process?.env?.COLLECTOR_BLURHASH_QUEUE_NAME ?? ``;
 const downloadWallpaperQueueName = process?.env?.COLLECTOR_DOWNLOAD_WALLPAPER_QUEUE_NAME ?? ``;
 
-export class CollectorStack extends cdk.Stack {
+export class AlfredStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -37,11 +37,7 @@ export class CollectorStack extends cdk.Stack {
       tableName: dynamoTableName,
       partitionKey: { name: 'pk', type: dynamo.AttributeType.STRING },
       sortKey: { name: 'sk', type: dynamo.AttributeType.STRING },
-      stream: dynamo.StreamViewType.NEW_IMAGE,
-    });
-    table.addGlobalSecondaryIndex({
-      indexName: `${dynamoTableName}-media-type-index`,
-      partitionKey: { name: `media_type`, type: dynamo.AttributeType.STRING },
+      // stream: dynamo.StreamViewType.NEW_IMAGE,
     });
 
     const wallpapersBucket = new s3.Bucket(this, wallpapersBucketName, {
@@ -81,6 +77,14 @@ export class CollectorStack extends cdk.Stack {
       // logRetention: logs.RetentionDays.ONE_DAY,
     });
 
+    const search_wallpapers = new lambda.Function(this, `search_wallpapers`, {
+      handler: `main`,
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      code: lambda.Code.fromAsset(path.resolve(__dirname, `./lambdas/search_wallpapers/bootstrap.zip`)),
+      functionName: `search_wallpapers`,
+      // logRetention: logs.RetentionDays.ONE_DAY,
+    });
+
     // Permissions
     blurhashQueue.grantSendMessages(get_wallpapers_from_source);
     blurhashQueue.grantConsumeMessages(attach_blurhash);
@@ -89,6 +93,7 @@ export class CollectorStack extends cdk.Stack {
     downloadWallpaperQueue.grantConsumeMessages(download_wallpaper_from_queue);
 
     table.grantReadData(get_wallpapers_from_source);
+    table.grantReadData(search_wallpapers);
     table.grantWriteData(download_wallpaper_from_queue);
 
     wallpapersBucket.grantWrite(download_wallpaper_from_queue);
@@ -99,4 +104,4 @@ export class CollectorStack extends cdk.Stack {
 }
 
 const app = new cdk.App();
-new CollectorStack(app, 'CollectorStack', {});
+new AlfredStack(app, 'Alfred', {});

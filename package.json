@@ -1,5 +1,5 @@
 {
-  "name": "aws",
+  "name": "alfred",
   "version": "0.1.0",
   "bin": {
     "stack": "aws/stack.js"

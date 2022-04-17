@@ -1,9 +1,9 @@
-import React, { FC } from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Header, Footer, MuiTheme } from './components';
 import { Crypto, Home, Wallpapers } from './pages';
 
-export const App: FC = () => {
+export const App = () => {
   return (
     <MuiTheme>
       <Router>

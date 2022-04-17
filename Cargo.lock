@@ -24,6 +24,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "alfred"
+version = "0.1.0"
+dependencies = [
+ "aws-config",
+ "aws-sdk-dynamodb",
+ "aws-sdk-s3",
+ "aws-sdk-sqs",
+ "blurhash",
+ "bytes",
+ "dotenv",
+ "dotenv_codegen",
+ "futures",
+ "image",
+ "lambda_runtime",
+ "reqwest",
+ "scraper",
+ "serde",
+ "serde_json",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "async-stream"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1529,28 +1552,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "picture_collector"
-version = "0.1.0"
-dependencies = [
- "aws-config",
- "aws-sdk-dynamodb",
- "aws-sdk-s3",
- "aws-sdk-sqs",
- "blurhash",
- "bytes",
- "dotenv",
- "dotenv_codegen",
- "futures",
- "image",
- "lambda_runtime",
- "reqwest",
- "scraper",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "pin-project"
 version = "1.0.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2432,6 +2433,15 @@ name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "09cc8ee72d2a9becf2f2febe0205bbed8fc6615b7cb429ad062dc7b7ddd036a9"
+
+[[package]]
+name = "uuid"
+version = "0.8.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
+dependencies = [
+ "getrandom 0.2.6",
+]
 
 [[package]]
 name = "want"
