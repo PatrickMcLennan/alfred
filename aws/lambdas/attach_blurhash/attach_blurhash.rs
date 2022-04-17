@@ -45,8 +45,6 @@ async fn handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
 
   let input_item: BlurhashQueueInputItem = serde_json::from_str(&body).unwrap();
 
-  println!("Viewing {} on the blurhash queue, with {} thumbnail_url", input_item.name, input_item.thumbnail_url);
-
   let stream = Http::image_stream(input_item.thumbnail_url.to_string()).await;
   let image = bytes::Bytes::from(stream);
   let memory_image = image::load_from_memory(&image).unwrap();
@@ -61,7 +59,7 @@ async fn handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
   // Stringify new metatdata with blurhash, place onto next queue, remove from calling queue
   let output_string = serde_json::ser::to_string(&output_raw).unwrap();
 
-  println!("Placing {} on the download wallpaper queue, removing entry from blurhash queue", output_string);
+  println!("Placing {} on the download wallpaper queue with a blurhash, removing entry from blurhash queue", output_string);
 
   sqs_client
     .send_message()

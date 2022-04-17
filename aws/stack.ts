@@ -1,3 +1,4 @@
+import * as api from '@aws-cdk/aws-apigateway';
 import * as cdk from '@aws-cdk/core';
 import * as lambda from '@aws-cdk/aws-lambda';
 import * as s3 from '@aws-cdk/aws-s3';
@@ -21,11 +22,17 @@ export class AlfredStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
+    /**
+     * Cron schedules
+     */
     const everyTwoHoursCronJob = new events.Rule(this, 'everyTwoHoursCronJob', {
       schedule: events.Schedule.cron({ minute: `0`, hour: `0/2` }),
       ruleName: `everyTwoHoursCronJob`,
     });
 
+    /**
+     * SQS Queues
+     */
     const blurhashQueue = new sqs.Queue(this, blurhashQueueName, {
       queueName: blurhashQueueName,
     });
@@ -33,6 +40,19 @@ export class AlfredStack extends cdk.Stack {
       queueName: downloadWallpaperQueueName,
     });
 
+    /**
+     * API Gateway
+     */
+    const restApi = new api.RestApi(this, `alfred-api`, {
+      restApiName: `alfred-api`,
+      description: `Rest API for Alfred`,
+    });
+    const restApiRoot = restApi.root.addResource('api');
+    const wallpapersApi = restApiRoot.addResource('wallpapers');
+
+    /**
+     * Dynamo Tables
+     */
     const table = new dynamo.Table(this, dynamoTableName, {
       tableName: dynamoTableName,
       partitionKey: { name: 'pk', type: dynamo.AttributeType.STRING },
@@ -40,6 +60,9 @@ export class AlfredStack extends cdk.Stack {
       // stream: dynamo.StreamViewType.NEW_IMAGE,
     });
 
+    /**
+     * S3 buckets
+     */
     const wallpapersBucket = new s3.Bucket(this, wallpapersBucketName, {
       blockPublicAccess: s3.BlockPublicAccess.BLOCK_ALL,
       bucketName: wallpapersBucketName,
@@ -57,6 +80,9 @@ export class AlfredStack extends cdk.Stack {
       })
     );
 
+    /**
+     * Lambdas
+     */
     const download_wallpaper_from_queue = new lambda.Function(this, `download_wallpaper_from_queue`, {
       handler: `main`,
       runtime: lambda.Runtime.PROVIDED_AL2,
@@ -85,7 +111,9 @@ export class AlfredStack extends cdk.Stack {
       // logRetention: logs.RetentionDays.ONE_DAY,
     });
 
-    // Permissions
+    /**
+     * Permissions
+     */
     blurhashQueue.grantSendMessages(get_wallpapers_from_source);
     blurhashQueue.grantConsumeMessages(attach_blurhash);
 
@@ -98,7 +126,15 @@ export class AlfredStack extends cdk.Stack {
 
     wallpapersBucket.grantWrite(download_wallpaper_from_queue);
 
-    // Cron jobs
+    /**
+     * API Routes
+     */
+
+    wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers));
+
+    /**
+     * Cron jobs
+     */
     everyTwoHoursCronJob.addTarget(new targets.LambdaFunction(get_wallpapers_from_source));
   }
 }

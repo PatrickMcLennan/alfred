@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Serialize};
 
 #[derive(Debug, Serialize)]
 pub struct DynamoImage {

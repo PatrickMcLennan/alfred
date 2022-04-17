@@ -17,38 +17,41 @@ struct HttpEvent {
 pub struct HttpResponseBody {
   pub total: i32,
   pub images: Vec<DynamoImage>,
+  pub message: String,
 }
 
 #[derive(Serialize)]
 #[allow(non_snake_case)]
 struct HttpResponse {
   pub statusCode: u16,
-  pub message: String,
   pub body: String,
 }
 
 async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
+  println!("Event: {:?}", event);
   let table_name = dotenv!("COLLECTOR_DYNAMODB").to_string();
 
-  let body = event.payload.body.unwrap();
+  let body = event.payload.body.unwrap_or_default();
+  println!("body: {}", body);
 
   let dynamo_client = DynamoDB::new().await;
   let mut limit = 0 as i32;
   let mut start_key = String::new();
   let mut contains = String::new();
 
+  println!("limit: {}", limit);
+  println!("start_key: {}", start_key);
+  println!("contains: {}", contains);
+
   if !body.is_empty() {
+    println!("The body is not empty: {}", body);
     let image_search_dto: ImageSearchDto = serde_json::from_str(&body).unwrap();
     match image_search_dto.contains { 
       Some(v) => contains = v, 
       None => () 
     };
     match image_search_dto.limit { 
-      Some(v) => 
-        limit = match v.parse::<i32>() {
-          Ok(i) => i,
-          Err(_) => 0 as i32
-        }, 
+      Some(v) => limit = v, 
       None => () 
     };
     match image_search_dto.start_key { 
@@ -56,6 +59,8 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
       None => () 
     };
   };
+
+  println!("past body.is_empty block");
   
   let mut results_query = dynamo_client
     .query()
@@ -65,13 +70,19 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     .expression_attribute_values(":pk", AttributeValue::S("image|widescreen_wallpaper".to_string()));
 
   if !contains.is_empty() {
+    println!("contains query being added with: {}", contains);
     results_query = results_query
       .set_filter_expression(Some("contains(#name, :name)".to_string()))
       .expression_attribute_names("#name", "name")
       .expression_attribute_values(":name", AttributeValue::S(contains));
   }
-  if limit >= 1 { results_query = results_query.set_limit(Some(limit)); () }
+  if limit >= 1 { 
+    println!("limit query being added with: {}", limit);
+    results_query = results_query.set_limit(Some(limit)); 
+    () 
+  }
   if !start_key.is_empty() {
+    println!("start_key query being added with: {}", start_key);
     let map = HashMap::from([
       ("pk".to_string(), AttributeValue::S("image|widescreen_wallpaper".to_string())),
       ("sk".to_string(), AttributeValue::S(start_key)),
@@ -79,16 +90,23 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     results_query = results_query.set_exclusive_start_key(Some(map))
   }
 
+  println!("queries have been modded successfully");
+
   let results = results_query
     .send()
     .await
     .unwrap();
 
+    println!("results have been fetched: {:?}", results);
+
   if results.count <= 0 {
     return Ok(HttpResponse {
       statusCode: 404,
-      message: "No items found with that criteria".to_string(),
-      body: String::new(),
+      body: serde_json::to_string(&HttpResponseBody {
+        total: 0,
+        message: "No items found with that criteria".to_string(),
+        images: vec![]
+      }).unwrap(),
     })
   }
 
@@ -112,14 +130,18 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     )
     .collect();
 
-  let body = serde_json::ser::to_string(&HttpResponseBody {
+  println!("Formatted items are ready: {:?}", formatted_items);
+  
+  let body = serde_json::to_string(&HttpResponseBody {
     total: results.count,
-    images: formatted_items
-  }).unwrap();
-
-  Ok(HttpResponse {
-    statusCode: 200,
+    images: formatted_items,
     message: format!("{} images found.", results.count),
+  }).unwrap();
+  
+  println!("Response body is ready: {:?}", body);
+
+  return Ok(HttpResponse {
+    statusCode: 200,
     body
   })
 }

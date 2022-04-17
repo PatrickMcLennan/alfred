@@ -14,6 +14,7 @@
     "jest:watch": "jest --watchAll"
   },
   "devDependencies": {
+    "@aws-cdk/aws-apigateway": "1.152.0",
     "@aws-cdk/aws-dynamodb": "1.152.0",
     "@aws-cdk/aws-events": "1.152.0",
     "@aws-cdk/aws-events-targets": "1.152.0",
