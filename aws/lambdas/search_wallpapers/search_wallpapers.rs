@@ -32,19 +32,13 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
   let table_name = dotenv!("COLLECTOR_DYNAMODB").to_string();
 
   let body = event.payload.body.unwrap_or_default();
-  println!("body: {}", body);
 
   let dynamo_client = DynamoDB::new().await;
   let mut limit = 0 as i32;
   let mut start_key = String::new();
   let mut contains = String::new();
 
-  println!("limit: {}", limit);
-  println!("start_key: {}", start_key);
-  println!("contains: {}", contains);
-
   if !body.is_empty() {
-    println!("The body is not empty: {}", body);
     let image_search_dto: ImageSearchDto = serde_json::from_str(&body).unwrap();
     match image_search_dto.contains { 
       Some(v) => contains = v, 
@@ -59,8 +53,6 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
       None => () 
     };
   };
-
-  println!("past body.is_empty block");
   
   let mut results_query = dynamo_client
     .query()
@@ -70,19 +62,16 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     .expression_attribute_values(":pk", AttributeValue::S("image|widescreen_wallpaper".to_string()));
 
   if !contains.is_empty() {
-    println!("contains query being added with: {}", contains);
     results_query = results_query
       .set_filter_expression(Some("contains(#name, :name)".to_string()))
       .expression_attribute_names("#name", "name")
       .expression_attribute_values(":name", AttributeValue::S(contains));
   }
   if limit >= 1 { 
-    println!("limit query being added with: {}", limit);
     results_query = results_query.set_limit(Some(limit)); 
     () 
   }
   if !start_key.is_empty() {
-    println!("start_key query being added with: {}", start_key);
     let map = HashMap::from([
       ("pk".to_string(), AttributeValue::S("image|widescreen_wallpaper".to_string())),
       ("sk".to_string(), AttributeValue::S(start_key)),
@@ -90,14 +79,10 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     results_query = results_query.set_exclusive_start_key(Some(map))
   }
 
-  println!("queries have been modded successfully");
-
   let results = results_query
     .send()
     .await
     .unwrap();
-
-    println!("results have been fetched: {:?}", results);
 
   if results.count <= 0 {
     return Ok(HttpResponse {
@@ -129,16 +114,12 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
       }
     )
     .collect();
-
-  println!("Formatted items are ready: {:?}", formatted_items);
   
   let body = serde_json::to_string(&HttpResponseBody {
     total: results.count,
     images: formatted_items,
     message: format!("{} images found.", results.count),
   }).unwrap();
-  
-  println!("Response body is ready: {:?}", body);
 
   return Ok(HttpResponse {
     statusCode: 200,

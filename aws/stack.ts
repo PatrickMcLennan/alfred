@@ -1,11 +1,12 @@
 import * as api from '@aws-cdk/aws-apigateway';
 import * as cdk from '@aws-cdk/core';
-import * as lambda from '@aws-cdk/aws-lambda';
-import * as s3 from '@aws-cdk/aws-s3';
-import * as sqs from '@aws-cdk/aws-sqs';
-import * as path from 'path';
+import * as cognito from '@aws-cdk/aws-cognito';
 import * as dynamo from '@aws-cdk/aws-dynamodb';
 import * as events from '@aws-cdk/aws-events';
+import * as lambda from '@aws-cdk/aws-lambda';
+import * as path from 'path';
+import * as s3 from '@aws-cdk/aws-s3';
+import * as sqs from '@aws-cdk/aws-sqs';
 import * as targets from '@aws-cdk/aws-events-targets';
 import { SqsEventSource } from '@aws-cdk/aws-lambda-event-sources';
 
@@ -18,9 +19,89 @@ const dynamoTableName = process?.env?.COLLECTOR_DYNAMODB ?? ``;
 const blurhashQueueName = process?.env?.COLLECTOR_BLURHASH_QUEUE_NAME ?? ``;
 const downloadWallpaperQueueName = process?.env?.COLLECTOR_DOWNLOAD_WALLPAPER_QUEUE_NAME ?? ``;
 
+const standardCognitoAttributes = {
+  givenName: true,
+  familyName: true,
+  email: true,
+  emailVerified: true,
+  address: true,
+  birthdate: true,
+  gender: true,
+  locale: true,
+  middleName: true,
+  fullname: true,
+  nickname: true,
+  phoneNumber: true,
+  phoneNumberVerified: true,
+  profilePicture: true,
+  preferredUsername: true,
+  profilePage: true,
+  timezone: true,
+  lastUpdateTime: true,
+  website: true,
+};
 export class AlfredStack extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
+
+    /**
+     * Cognito Pools
+     */
+    const userPool = new cognito.UserPool(this, `alfred-userpool`, {
+      userPoolName: `alfred-userpool`,
+      selfSignUpEnabled: false,
+      signInAliases: {
+        email: true,
+      },
+      autoVerify: {
+        email: true,
+      },
+      standardAttributes: {
+        familyName: {
+          required: true,
+          mutable: true,
+        },
+        givenName: {
+          required: true,
+          mutable: true,
+        },
+      },
+      customAttributes: {
+        isAdmin: new cognito.BooleanAttribute({ mutable: true }),
+      },
+      passwordPolicy: {
+        minLength: 12,
+        requireLowercase: true,
+        requireDigits: true,
+        requireUppercase: true,
+        requireSymbols: true,
+      },
+      accountRecovery: cognito.AccountRecovery.EMAIL_ONLY,
+      removalPolicy: cdk.RemovalPolicy.RETAIN,
+    });
+
+    const userPoolClient = new cognito.UserPoolClient(this, `alfred-cognito-provider`, {
+      accessTokenValidity: cdk.Duration.minutes(5),
+      userPoolClientName: `alfred-cognito-provider`,
+      userPool,
+      authFlows: {
+        adminUserPassword: true,
+        custom: true,
+        userSrp: true,
+      },
+      supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.COGNITO],
+      readAttributes: new cognito.ClientAttributes()
+        .withStandardAttributes(standardCognitoAttributes)
+        .withCustomAttributes(...['isAdmin']),
+      refreshTokenValidity: cdk.Duration.days(5),
+      writeAttributes: new cognito.ClientAttributes()
+        .withStandardAttributes({
+          ...standardCognitoAttributes,
+          emailVerified: false,
+          phoneNumberVerified: false,
+        })
+        .withCustomAttributes(...[]),
+    });
 
     /**
      * Cron schedules
@@ -41,7 +122,7 @@ export class AlfredStack extends cdk.Stack {
     });
 
     /**
-     * API Gateway
+     * API Gateways
      */
     const restApi = new api.RestApi(this, `alfred-api`, {
       restApiName: `alfred-api`,
@@ -129,13 +210,19 @@ export class AlfredStack extends cdk.Stack {
     /**
      * API Routes
      */
-
     wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers));
 
     /**
      * Cron jobs
      */
     everyTwoHoursCronJob.addTarget(new targets.LambdaFunction(get_wallpapers_from_source));
+
+    new cdk.CfnOutput(this, 'userPoolId', {
+      value: userPool.userPoolId,
+    });
+    new cdk.CfnOutput(this, 'userPoolClientId', {
+      value: userPoolClient.userPoolClientId,
+    });
   }
 }
 
