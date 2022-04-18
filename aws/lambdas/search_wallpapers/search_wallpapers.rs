@@ -28,7 +28,6 @@ struct HttpResponse {
 }
 
 async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
-  println!("Event: {:?}", event);
   let table_name = dotenv!("COLLECTOR_DYNAMODB").to_string();
 
   let body = event.payload.body.unwrap_or_default();

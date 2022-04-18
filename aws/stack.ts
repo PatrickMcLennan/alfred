@@ -15,6 +15,7 @@ import { config } from 'dotenv';
 config({ path: path.resolve(__dirname, '../.env') });
 
 const wallpapersBucketName = process?.env?.WIDESCREEN_WALLPAPERS_BUCKET_NAME ?? ``;
+const cognitoPoolName = process?.env?.COLLECTOR_USER_POOL_NAME ?? ``;
 const dynamoTableName = process?.env?.COLLECTOR_DYNAMODB ?? ``;
 const blurhashQueueName = process?.env?.COLLECTOR_BLURHASH_QUEUE_NAME ?? ``;
 const downloadWallpaperQueueName = process?.env?.COLLECTOR_DOWNLOAD_WALLPAPER_QUEUE_NAME ?? ``;
@@ -47,8 +48,8 @@ export class AlfredStack extends cdk.Stack {
     /**
      * Cognito Pools
      */
-    const userPool = new cognito.UserPool(this, `alfred-userpool`, {
-      userPoolName: `alfred-userpool`,
+    const userPool = new cognito.UserPool(this, cognitoPoolName, {
+      userPoolName: cognitoPoolName,
       selfSignUpEnabled: false,
       signInAliases: {
         email: true,
@@ -85,9 +86,10 @@ export class AlfredStack extends cdk.Stack {
       userPoolClientName: `alfred-cognito-provider`,
       userPool,
       authFlows: {
-        adminUserPassword: true,
-        custom: true,
-        userSrp: true,
+        userPassword: true,
+        // adminUserPassword: true,
+        // custom: true,
+        // userSrp: true,
       },
       supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.COGNITO],
       readAttributes: new cognito.ClientAttributes()
@@ -129,6 +131,7 @@ export class AlfredStack extends cdk.Stack {
       description: `Rest API for Alfred`,
     });
     const restApiRoot = restApi.root.addResource('api');
+    const authApi = restApiRoot.addResource('auth');
     const wallpapersApi = restApiRoot.addResource('wallpapers');
 
     /**
@@ -184,6 +187,14 @@ export class AlfredStack extends cdk.Stack {
       // logRetention: logs.RetentionDays.ONE_DAY,
     });
 
+    const login = new lambda.Function(this, `login`, {
+      handler: `main`,
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      code: lambda.Code.fromAsset(path.resolve(__dirname, `./lambdas/login/bootstrap.zip`)),
+      functionName: `login`,
+      // logRetention: logs.RetentionDays.ONE_DAY,
+    });
+
     const search_wallpapers = new lambda.Function(this, `search_wallpapers`, {
       handler: `main`,
       runtime: lambda.Runtime.PROVIDED_AL2,
@@ -210,6 +221,7 @@ export class AlfredStack extends cdk.Stack {
     /**
      * API Routes
      */
+    authApi.addMethod(`POST`, new api.LambdaIntegration(login));
     wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers));
 
     /**

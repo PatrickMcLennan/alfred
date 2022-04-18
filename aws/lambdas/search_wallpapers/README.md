@@ -12,9 +12,9 @@ Lambda behind API Gateway accepting optional props to either search wallpapers b
 ```rust
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ImageSearchDto {
-  pub limit: Option<i32>,
-  pub start_key: Option<String>,
-  pub contains: Option<String>
+  pub limit: Option<i32>, // The amount you want returned
+  pub start_key: Option<String>, // the primary key of an item that you want to start the query at 
+  pub contains: Option<String>  // a string that's pattern matched with each qualifying records "name" attribute
 }
 ```
 <hr />

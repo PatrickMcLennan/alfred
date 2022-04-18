@@ -28,6 +28,8 @@ name = "alfred"
 version = "0.1.0"
 dependencies = [
  "aws-config",
+ "aws-sdk-cognitoidentity",
+ "aws-sdk-cognitoidentityprovider",
  "aws-sdk-dynamodb",
  "aws-sdk-s3",
  "aws-sdk-sqs",
@@ -126,6 +128,50 @@ dependencies = [
  "lazy_static",
  "percent-encoding",
  "tracing",
+]
+
+[[package]]
+name = "aws-sdk-cognitoidentity"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8977bffefdf7f818979a1d5b1231b1acee2fdadf7c5b4ffb7d7828db174068da"
+dependencies = [
+ "aws-endpoint",
+ "aws-http",
+ "aws-sig-auth",
+ "aws-smithy-async",
+ "aws-smithy-client",
+ "aws-smithy-http",
+ "aws-smithy-http-tower",
+ "aws-smithy-json",
+ "aws-smithy-types",
+ "aws-types",
+ "bytes",
+ "http",
+ "tokio-stream",
+ "tower",
+]
+
+[[package]]
+name = "aws-sdk-cognitoidentityprovider"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "229241dce20fc5c33d53606a419215e30a3736ebef9dd4567d10d39c287a607b"
+dependencies = [
+ "aws-endpoint",
+ "aws-http",
+ "aws-sig-auth",
+ "aws-smithy-async",
+ "aws-smithy-client",
+ "aws-smithy-http",
+ "aws-smithy-http-tower",
+ "aws-smithy-json",
+ "aws-smithy-types",
+ "aws-types",
+ "bytes",
+ "http",
+ "tokio-stream",
+ "tower",
 ]
 
 [[package]]
