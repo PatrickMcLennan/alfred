@@ -5,3 +5,4 @@ node_modules/
 bootstrap.zip
 cdk.out/
 ui/dist/
+keys.json

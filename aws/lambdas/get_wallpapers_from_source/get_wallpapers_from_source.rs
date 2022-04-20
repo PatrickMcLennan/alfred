@@ -77,7 +77,7 @@ async fn handler(_: LambdaEvent<Event>) -> Result<(), Error> {
           thumbnail_url: post.thumbnail_url.to_string(),
           name: post.name.to_string(),
         }
-      ).unwrap();
+      ).unwrap_or_default();
       println!("Inserting {} into the blurhash queue now . . .", json_string);
       SendMessageBatchRequestEntry::builder()
         .set_message_body(Some(json_string))

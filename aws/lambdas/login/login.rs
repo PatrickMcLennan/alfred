@@ -41,8 +41,6 @@ struct HttpResponse {
 
 async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
   let user_pool_client_id = dotenv!("COLLECTOR_USER_POOL_CLIENT_ID").to_string();
-  let auth_cookie_name = dotenv!("COLLECTOR_COOKIE_NAME").to_string();
-
   let four_hundred = HttpResponse {
     statusCode: 400,
     body: serde_json::to_string(&HttpResponseBody {
@@ -53,6 +51,7 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     multiValueHeaders: None
   };
 
+
   let body = event.payload.body.unwrap_or_default();
   if body.is_empty() { return Ok(four_hundred) };
   let login_dto: LoginDto = match serde_json::from_str(&body) {
@@ -60,12 +59,19 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     Err(_) => return Ok(four_hundred)
   };
 
-  let (email, password) = (login_dto.email.unwrap_or_default(), login_dto.password.unwrap_or_default());
-  if email.is_empty() | password.is_empty() { return Ok(four_hundred) }
+  let (email, password) = (
+    match login_dto.email {
+      Some(v) => if v.is_empty() { return Ok(four_hundred) } else { v },
+      None => return Ok(four_hundred)
+    }, 
+    match login_dto.password {
+      Some(v) => if v.is_empty() { return Ok(four_hundred) } else { v },
+      None => return Ok(four_hundred)
+    }
+  );
 
-  let cognito_client = Cognito::new().await;
-
-  match cognito_client
+  match Cognito::new()
+    .await
     .initiate_auth()
     .auth_flow(AuthFlowType::UserPasswordAuth)
     .client_id(user_pool_client_id)
@@ -74,29 +80,38 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     .send()
     .await {
       Ok(v) => {
-        println!("Success!  Here's the output: {:?}", v);
         let credentials = v.authentication_result.unwrap();
         let access_token = credentials.access_token.unwrap_or_default();
-        let refresh_token = credentials.refresh_token.unwrap_or_default();
+        let expires_in = credentials.expires_in.to_string();
         let id_token = credentials.id_token.unwrap_or_default();
+        let refresh_token = credentials.refresh_token.unwrap_or_default();
+        let token_type = credentials.token_type.unwrap_or_default();
+        
         return Ok(HttpResponse {
           statusCode: 200,
           body: serde_json::to_string(&HttpResponseBody {
             success: true,
             message: "Logged in".to_string(),
-            id_token: Some(id_token)
+            id_token: Some(id_token.to_string())
           }).unwrap_or_default(),
           multiValueHeaders: Some(MultiValueHeaders {
             Set_Cookie: vec![
-              format!("access-token=Bearer {};httpOnly;Secure;", access_token),
-              format!("refresh-token={};httpOnly;Secure;", refresh_token)
+              format!("alfred_access_token={};httpOnly;Secure;", access_token),
+              format!("alfred_expires_in={};httpOnly;Secure;", expires_in),
+              format!("alfred_id_token={};httpOnly;Secure;", id_token),
+              format!("alfred_refresh_token={};httpOnly;Secure;", refresh_token),
+              format!("alfred_token_type={};httpOnly;Secure;", token_type)
             ]
           })
         })
       },
       Err(e) => {
         println!("Error!  Here's the error: {}", e);
-        return Ok(four_hundred);
+        return Ok(HttpResponse {
+          statusCode: 401,
+          body: "Unauthorized".to_string(),
+          multiValueHeaders: None,
+        });
       }
     }
 }

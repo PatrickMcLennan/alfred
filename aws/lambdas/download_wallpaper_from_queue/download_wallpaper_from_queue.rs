@@ -27,7 +27,10 @@ async fn handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
   let bucket_name = dotenv!("WIDESCREEN_WALLPAPERS_BUCKET_NAME").to_string();
   let download_wallpaper_queue_name = dotenv!("COLLECTOR_DOWNLOAD_WALLPAPER_QUEUE_NAME").to_string();
 
-  let time_stamp = SystemTime::now().duration_since(SystemTime::UNIX_EPOCH).unwrap().as_secs();
+  let time_stamp = SystemTime::now()
+    .duration_since(SystemTime::UNIX_EPOCH)
+    .unwrap()
+    .as_secs();
 
   let sqs_client = SQS::new().await;
   let s3_client = S3::new().await;

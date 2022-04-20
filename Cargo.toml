@@ -12,6 +12,10 @@ name = "attach_blurhash"
 path = "./aws/lambdas/attach_blurhash/attach_blurhash.rs"
 
 [[bin]]
+name = "authorizer"
+path = "./aws/lambdas/authorizer/authorizer.rs"
+
+[[bin]]
 name = "download_wallpaper_from_queue"
 path = "./aws/lambdas/download_wallpaper_from_queue/download_wallpaper_from_queue.rs"
 
@@ -36,12 +40,16 @@ path = "./clients/cli/widescreen_wallpapers/widescreen_wallpapers_cli.rs"
 [dependencies]
 aws-config = "0.10.1"
 aws-sdk-cognitoidentity = "0.10.1"
+aws-sdk-apigateway = "0.10.1"
 aws-sdk-cognitoidentityprovider = "0.10.1"
 aws-sdk-dynamodb = "0.10.1"
 aws-sdk-s3 = "0.10.1"
 aws-sdk-sqs = "0.10.1"
 blurhash = "0.1.1"
 bytes = "1.1.0"
+cookie = { version = "0.16.0", features = ["percent-encode"] }
+chrono = "0.4"
+jsonwebtoken = "8.1.0"
 lambda_runtime = "0.5.1"
 dotenv = "0.15.0"
 dotenv_codegen = "0.15.0"

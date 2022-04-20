@@ -41,7 +41,7 @@ const standardCognitoAttributes = {
   lastUpdateTime: true,
   website: true,
 };
-export class AlfredStack extends cdk.Stack {
+export class Alfred extends cdk.Stack {
   constructor(scope: cdk.Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
@@ -87,9 +87,6 @@ export class AlfredStack extends cdk.Stack {
       userPool,
       authFlows: {
         userPassword: true,
-        // adminUserPassword: true,
-        // custom: true,
-        // userSrp: true,
       },
       supportedIdentityProviders: [cognito.UserPoolClientIdentityProvider.COGNITO],
       readAttributes: new cognito.ClientAttributes()
@@ -124,15 +121,43 @@ export class AlfredStack extends cdk.Stack {
     });
 
     /**
-     * API Gateways
+     * API Gateway
      */
+
+    const integrationResponse = new api.Integration({
+      type: api.IntegrationType.HTTP,
+      options: {
+        integrationResponses: [
+          {
+            statusCode: 'statusCode',
+            responseParameters: {
+              'method.response.header.Set-Cookie': '$context.authorizer.Set-Cookie',
+            },
+          },
+        ],
+      },
+    });
+
     const restApi = new api.RestApi(this, `alfred-api`, {
       restApiName: `alfred-api`,
+      defaultIntegration: integrationResponse,
       description: `Rest API for Alfred`,
     });
+
     const restApiRoot = restApi.root.addResource('api');
     const authApi = restApiRoot.addResource('auth');
     const wallpapersApi = restApiRoot.addResource('wallpapers');
+
+    const authorizer_lambda = new lambda.Function(this, `alfred-authorizer-lambda`, {
+      handler: `main`,
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      code: lambda.Code.fromAsset(path.resolve(__dirname, `./lambdas/authorizer/bootstrap.zip`)),
+      functionName: `authorizer`,
+    });
+    const authorizer = new api.RequestAuthorizer(this, `alfred-request-authorizer`, {
+      handler: authorizer_lambda,
+      identitySources: [api.IdentitySource.header('Cookie')],
+    });
 
     /**
      * Dynamo Tables
@@ -222,7 +247,9 @@ export class AlfredStack extends cdk.Stack {
      * API Routes
      */
     authApi.addMethod(`POST`, new api.LambdaIntegration(login));
-    wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers));
+    wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers), {
+      authorizer,
+    });
 
     /**
      * Cron jobs
@@ -235,8 +262,11 @@ export class AlfredStack extends cdk.Stack {
     new cdk.CfnOutput(this, 'userPoolClientId', {
       value: userPoolClient.userPoolClientId,
     });
+    new cdk.CfnOutput(this, 'apigatewayId', {
+      value: restApi.restApiId,
+    });
   }
 }
 
 const app = new cdk.App();
-new AlfredStack(app, 'Alfred', {});
+new Alfred(app, 'Alfred', {});

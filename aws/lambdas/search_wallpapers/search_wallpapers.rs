@@ -90,7 +90,7 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
         total: 0,
         message: "No items found with that criteria".to_string(),
         images: vec![]
-      }).unwrap(),
+      }).unwrap_or_default(),
     })
   }
 
@@ -113,16 +113,14 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
       }
     )
     .collect();
-  
-  let body = serde_json::to_string(&HttpResponseBody {
-    total: results.count,
-    images: formatted_items,
-    message: format!("{} images found.", results.count),
-  }).unwrap();
 
   return Ok(HttpResponse {
     statusCode: 200,
-    body
+    body: serde_json::to_string(&HttpResponseBody {
+      total: results.count,
+      images: formatted_items,
+      message: format!("{} images found.", results.count),
+    }).unwrap_or_default()
   })
 }
 

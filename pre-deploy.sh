@@ -2,6 +2,7 @@
 
 nvm use
 
+rm aws/lambdas/authorizer/bootstrap.zip
 rm aws/lambdas/attach_blurhash/bootstrap.zip
 rm aws/lambdas/download_wallpaper_from_queue/bootstrap.zip
 rm aws/lambdas/get_wallpapers_from_source/bootstrap.zip
@@ -14,6 +15,18 @@ echo " - - - "
 echo "  Compiling rust with --release flag now . . ." 
 echo " - - - "
 cross build --release --target x86_64-unknown-linux-musl
+
+echo
+echo " - - - "
+echo "  Creating bootstrap of authorizer . . ."
+echo " - - - "
+cp target/x86_64-unknown-linux-musl/release/authorizer ./bootstrap 
+echo " - - - "
+echo "  Creating zip of authorizer . . ."
+echo " - - - "
+zip ./aws/lambdas/authorizer/bootstrap.zip bootstrap     
+
+rm bootstrap
 
 echo
 echo " - - - "
