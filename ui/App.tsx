@@ -1,15 +1,26 @@
-import { StrictMode } from 'react';
+import { FC, StrictMode, useRef } from 'react';
 import { Box } from '@mui/system';
 import { AxiosRequestConfig } from 'axios';
 import React from 'react';
-import { BrowserRouter as Router, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter } from 'react-router-dom';
 import { SWRConfig } from 'swr';
 import { axiosFetcher } from './clients';
 import { Header, Footer, MuiTheme } from './components';
-import { Crypto, Home, Login, Wallpapers } from './pages';
+import { Router } from './components';
+import { useUser } from './stores';
 
-export const App = () => {
-  const isLoggedIn = document.cookie.includes(`alfred_is_logged_in=true`);
+type Props = {
+  isLoggedIn: boolean;
+};
+
+export const App: FC<Props> = ({ isLoggedIn }) => {
+  const firstRender = useRef<boolean>(true);
+  const { userAuthEvent } = useUser();
+
+  if (firstRender.current) {
+    userAuthEvent(isLoggedIn);
+    firstRender.current = false;
+  }
 
   return (
     <StrictMode>
@@ -19,18 +30,13 @@ export const App = () => {
         }}
       >
         <MuiTheme>
-          <Router>
-            <Header isLoggedIn />
+          <BrowserRouter>
+            <Header />
             <Box className="main" component="main">
-              <Routes>
-                <Route path="/" element={isLoggedIn ? <Home /> : <Navigate replace to="/login" />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/crypto" element={isLoggedIn ? <Crypto /> : <Navigate replace to="/login" />} />
-                <Route path="/wallpapers" element={isLoggedIn ? <Wallpapers /> : <Navigate replace to="/login" />} />
-              </Routes>
+              <Router />
             </Box>
             <Footer />
-          </Router>
+          </BrowserRouter>
         </MuiTheme>
       </SWRConfig>
     </StrictMode>

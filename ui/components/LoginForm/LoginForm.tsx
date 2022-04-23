@@ -31,7 +31,7 @@ const sx = {
   },
 } as const;
 
-export default function LoginForm({ onSubmit, disabled, loading }: Props) {
+export function LoginForm({ onSubmit, disabled, loading }: Props) {
   const {
     formState: { errors },
     handleSubmit,

@@ -36,7 +36,6 @@ pub struct HttpResponseBody {
 struct HttpResponse {
   pub statusCode: u16,
   pub body: String,
-  // pub headers: Headers,
   pub multiValueHeaders: Option<MultiValueHeaders>
 }
 
@@ -44,9 +43,6 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
   let user_pool_client_id = dotenv!("COLLECTOR_USER_POOL_CLIENT_ID").to_string();
   let four_hundred = HttpResponse {
     statusCode: 400,
-    // headers: Headers {
-    //   Access_Control_Allow_Origin: "http://localhost:3000".to_string()
-    // },
     body: serde_json::to_string(&HttpResponseBody {
       success: false,
       message: "incorrect params".to_string(),
@@ -92,9 +88,6 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
         
         return Ok(HttpResponse {
           statusCode: 200,
-          // headers: Headers {
-          //   Access_Control_Allow_Origin: "http://localhost:3000".to_string()
-          // },
           body: serde_json::to_string(&HttpResponseBody {
             success: true,
             message: "Logged in".to_string(),

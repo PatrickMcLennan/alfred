@@ -7,6 +7,7 @@ rm aws/lambdas/attach_blurhash/bootstrap.zip
 rm aws/lambdas/download_wallpaper_from_queue/bootstrap.zip
 rm aws/lambdas/get_wallpapers_from_source/bootstrap.zip
 rm aws/lambdas/login/bootstrap.zip
+rm aws/lambdas/logout/bootstrap.zip
 rm aws/lambdas/search_wallpapers/bootstrap.zip
 rm aws/stack.js
 
@@ -73,6 +74,18 @@ echo " - - - "
 echo "  Creating zip of login . . ."
 echo " - - - "
 zip ./aws/lambdas/login/bootstrap.zip bootstrap     
+
+rm bootstrap
+
+echo
+echo " - - - "
+echo "  Creating bootstrap of logout . . ."
+echo " - - - "
+cp target/x86_64-unknown-linux-musl/release/logout ./bootstrap 
+echo " - - - "
+echo "  Creating zip of logout . . ."
+echo " - - - "
+zip ./aws/lambdas/logout/bootstrap.zip bootstrap     
 
 rm bootstrap
 

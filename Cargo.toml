@@ -28,14 +28,16 @@ name = "login"
 path = "./aws/lambdas/login/login.rs"
 
 [[bin]]
+name = "logout"
+path = "./aws/lambdas/logout/logout.rs"
+
+[[bin]]
 name = "search_wallpapers"
 path = "./aws/lambdas/search_wallpapers/search_wallpapers.rs"
-
 
 [[bin]]
 name = "widescreen_wallpapers_cli"
 path = "./clients/cli/widescreen_wallpapers/widescreen_wallpapers_cli.rs"
-
 
 [dependencies]
 aws-config = "0.10.1"

@@ -9,7 +9,7 @@ const Dotenv = require('dotenv-webpack');
 
 module.exports = {
   entry: {
-    app: path.resolve(__dirname, `../../ui/index.ts`),
+    app: path.resolve(__dirname, `../../ui/index.tsx`),
   },
   output: {
     path: path.resolve(__dirname, `../../ui/dist`),

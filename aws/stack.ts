@@ -149,6 +149,7 @@ export class Alfred extends cdk.Stack {
     const wallpapersApi = restApiRoot.addResource('wallpapers');
 
     const loginRoute = authApi.addResource('login');
+    const logoutRoute = authApi.addResource('logout');
 
     const authorizer_lambda = new lambda.Function(this, `alfred-authorizer-lambda`, {
       handler: `main`,
@@ -222,6 +223,14 @@ export class Alfred extends cdk.Stack {
       // logRetention: logs.RetentionDays.ONE_DAY,
     });
 
+    const logout = new lambda.Function(this, `logout`, {
+      handler: `main`,
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      code: lambda.Code.fromAsset(path.resolve(__dirname, `./lambdas/logout/bootstrap.zip`)),
+      functionName: `logout`,
+      // logRetention: logs.RetentionDays.ONE_DAY,
+    });
+
     const search_wallpapers = new lambda.Function(this, `search_wallpapers`, {
       handler: `main`,
       runtime: lambda.Runtime.PROVIDED_AL2,
@@ -249,6 +258,9 @@ export class Alfred extends cdk.Stack {
      * API Routes
      */
     loginRoute.addMethod(`POST`, new api.LambdaIntegration(login));
+    logoutRoute.addMethod(`POST`, new api.LambdaIntegration(logout), {
+      authorizer,
+    });
     wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers), {
       authorizer,
     });

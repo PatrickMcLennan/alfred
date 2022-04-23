@@ -22,7 +22,7 @@ struct EventHeaders {
 struct APIGatewayCustomAuthorizerRequest {
   #[serde(rename = "type")]
   _type: String,
-  headers: EventHeaders,
+  headers: Option<EventHeaders>,
   method_arn: String,
 }
 
@@ -35,7 +35,6 @@ pub struct HttpResponseHeaders {
 #[derive(Serialize, Debug)]
 #[allow(non_snake_case)]
 pub struct HttpResponse {
-  // pub multiValueHeaders: Option<HttpResponseHeaders>,
   pub body: PolicyDocument,
 }
 
@@ -48,13 +47,17 @@ async fn handler(event: LambdaEvent<APIGatewayCustomAuthorizerRequest>) -> Resul
   let cognito_client = Cognito::new().await;
   let mut new_access_token_string = String::new();
 
-  let cookie_string = match event.payload.headers.Cookie {
-    Some(v) => v,
-    None => {
-      println!("No event.payload.Cookie found");
-      return Ok(generate_document("Unauthorized", None, "Deny", &method_arn))
-    }
-  };
+  let cookie_string = match event
+    .payload
+    .headers
+    .unwrap_or_else(|| EventHeaders { Cookie: None } )
+    .Cookie {
+      Some(v) => v,
+      None => {
+        println!("No event.payload.Cookie found");
+        return Ok(generate_document("Unauthorized", None, "Deny", &method_arn))
+      }
+    };
 
   let mut cookie_jar = CookieJar::new();
   cookie_string
