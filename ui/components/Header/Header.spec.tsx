@@ -2,13 +2,16 @@ import React from 'react';
 import { screen, render } from '@testing-library/react';
 import { Header } from '.';
 import { MuiTheme } from '../MuiTheme';
+import { BrowserRouter } from 'react-router-dom';
 
 describe(`<Header />`, () => {
   beforeEach(() =>
     render(
-      <MuiTheme>
-        <Header />
-      </MuiTheme>
+      <BrowserRouter>
+        <MuiTheme>
+          <Header />
+        </MuiTheme>
+      </BrowserRouter>
     )
   );
 
@@ -19,6 +22,6 @@ describe(`<Header />`, () => {
 
   it('should display a menu with a link to the crypto page', () => {
     const cryptoLink = screen.getByTestId('crypto-link');
-    expect(cryptoLink.getAttribute('href')).toBe('/wallpapers');
+    expect(cryptoLink.getAttribute('href')).toBe('/crypto');
   });
 });

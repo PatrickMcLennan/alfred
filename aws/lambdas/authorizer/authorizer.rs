@@ -99,6 +99,7 @@ async fn handler(event: LambdaEvent<APIGatewayCustomAuthorizerRequest>) -> Resul
         println!("Error getting the access token and it doesn't need a refresh: {}", e);
         return Ok(generate_document("", None, "Deny", &method_arn))
       };
+      
       match &cognito_client
         .initiate_auth()
         .auth_flow(AuthFlowType::RefreshTokenAuth)
@@ -148,7 +149,7 @@ async fn handler(event: LambdaEvent<APIGatewayCustomAuthorizerRequest>) -> Resul
   let success_document = generate_document(
     &user_id, 
     Some(AuthorizerContext { 
-      Set_Cookie: format!("alfred_access_token={};httpOnly;Secure;", new_cookie_string) 
+      Set_Cookie: format!("alfred_access_token={};httpOnly;Secure;SameSite=None;", new_cookie_string) 
     }),
     "Allow", 
     &method_arn

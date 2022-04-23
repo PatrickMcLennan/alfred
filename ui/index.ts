@@ -1,8 +1,8 @@
 import { App } from './App';
-import { render } from 'react-dom';
+import { createRoot } from 'react-dom/client';
 
 import './styles.css';
 
-const ROOT = document.querySelector('#ROOT');
+const ROOT = createRoot(document.querySelector('#ROOT') as HTMLDivElement);
 
-render(App(), ROOT);
+ROOT.render(App());

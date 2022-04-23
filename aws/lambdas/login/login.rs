@@ -36,6 +36,7 @@ pub struct HttpResponseBody {
 struct HttpResponse {
   pub statusCode: u16,
   pub body: String,
+  // pub headers: Headers,
   pub multiValueHeaders: Option<MultiValueHeaders>
 }
 
@@ -43,6 +44,9 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
   let user_pool_client_id = dotenv!("COLLECTOR_USER_POOL_CLIENT_ID").to_string();
   let four_hundred = HttpResponse {
     statusCode: 400,
+    // headers: Headers {
+    //   Access_Control_Allow_Origin: "http://localhost:3000".to_string()
+    // },
     body: serde_json::to_string(&HttpResponseBody {
       success: false,
       message: "incorrect params".to_string(),
@@ -50,7 +54,6 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     }).unwrap_or_default(),
     multiValueHeaders: None
   };
-
 
   let body = event.payload.body.unwrap_or_default();
   if body.is_empty() { return Ok(four_hundred) };
@@ -89,6 +92,9 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
         
         return Ok(HttpResponse {
           statusCode: 200,
+          // headers: Headers {
+          //   Access_Control_Allow_Origin: "http://localhost:3000".to_string()
+          // },
           body: serde_json::to_string(&HttpResponseBody {
             success: true,
             message: "Logged in".to_string(),
@@ -96,11 +102,12 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
           }).unwrap_or_default(),
           multiValueHeaders: Some(MultiValueHeaders {
             Set_Cookie: vec![
-              format!("alfred_access_token={};httpOnly;Secure;", access_token),
-              format!("alfred_expires_in={};httpOnly;Secure;", expires_in),
-              format!("alfred_id_token={};httpOnly;Secure;", id_token),
-              format!("alfred_refresh_token={};httpOnly;Secure;", refresh_token),
-              format!("alfred_token_type={};httpOnly;Secure;", token_type)
+              format!("alfred_access_token={};httpOnly;Path=/;Secure;", access_token),
+              format!("alfred_expires_in={};httpOnly;Path=/;Secure;", expires_in),
+              format!("alfred_id_token={};httpOnly;Path=/;Secure;", id_token),
+              format!("alfred_refresh_token={};httpOnly;Path=/;Secure;", refresh_token),
+              format!("alfred_token_type={};httpOnly;Path=/;Secure;", token_type),
+              format!("alfred_is_logged_in={};Path=/;Secure;", "true".to_string())
             ]
           })
         })

@@ -6,3 +6,8 @@ bootstrap.zip
 cdk.out/
 ui/dist/
 keys.json
+private.crt
+private.csr
+private.key
+private.pem
+ssl.conf

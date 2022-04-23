@@ -8,6 +8,12 @@ const { merge } = require('webpack-merge');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 // eslint-disable-next-line
 const path = require('path');
+// eslint-disable-next-line
+const fs = require('fs');
+// eslint-disable-next-line
+const { config } = require('dotenv');
+
+config({ path: path.resolve(__dirname, `../../.env`) });
 
 module.exports = merge(common, {
   mode: `development`,
@@ -18,12 +24,29 @@ module.exports = merge(common, {
         warnings: false,
       },
     },
-    host: '0.0.0.0',
     compress: true,
     historyApiFallback: true,
     hot: true,
     open: true,
     port: 3000,
+    proxy: {
+      '/api/**': {
+        target: process.env.API_GATEWAY_URL,
+        secure: false,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': '',
+        },
+      },
+    },
+    server: {
+      type: 'https',
+      options: {
+        cert: fs.readFileSync(path.resolve(__dirname, `../../private.crt`)),
+        key: fs.readFileSync(path.resolve(__dirname, `../../private.key`)),
+        ca: fs.readFileSync(path.resolve(__dirname, `../../private.pem`)),
+      },
+    },
   },
   module: {
     rules: [

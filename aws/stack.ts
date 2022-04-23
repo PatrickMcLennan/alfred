@@ -148,6 +148,8 @@ export class Alfred extends cdk.Stack {
     const authApi = restApiRoot.addResource('auth');
     const wallpapersApi = restApiRoot.addResource('wallpapers');
 
+    const loginRoute = authApi.addResource('login');
+
     const authorizer_lambda = new lambda.Function(this, `alfred-authorizer-lambda`, {
       handler: `main`,
       runtime: lambda.Runtime.PROVIDED_AL2,
@@ -246,7 +248,7 @@ export class Alfred extends cdk.Stack {
     /**
      * API Routes
      */
-    authApi.addMethod(`POST`, new api.LambdaIntegration(login));
+    loginRoute.addMethod(`POST`, new api.LambdaIntegration(login));
     wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers), {
       authorizer,
     });
