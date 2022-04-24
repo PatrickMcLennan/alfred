@@ -1,7 +1,7 @@
 import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
-import LoginForm from './LoginForm';
+import { LoginForm } from './LoginForm';
 import { errorMessages } from '../../validators/login.validator';
 
 const onSubmit = jest.fn();

@@ -50,15 +50,16 @@ async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response>
     .for_each(|cookie| { 
       cookie_jar.add_original(Cookie::parse(cookie.to_string()).unwrap()); 
     });
+  let refresh_token = cookie_jar
+    .get("alfred_refresh_token")
+    .map(|v| v.value())
+    .unwrap_or_default();
+  if refresh_token.is_empty() { return Err(invalid_attempt) }
 
   match Cognito::new()
     .await
     .revoke_token()
-    .token(cookie_jar
-      .get("alfred_refresh_token")
-      .map(|v| v.value())
-      .unwrap_or_default()
-    )
+    .token(refresh_token)
     .client_id(user_pool_client_id)
     .send()
     .await {
@@ -77,12 +78,12 @@ async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response>
     body: "Successfully logged out.".to_string(),
     multiValueHeaders: Some(ResponseHeaders {
       Set_Cookie: vec![
-        format!("alfred_access_token={};{};Expires={}", String::new(), cookie_defaults, expired_date),
-        format!("alfred_expires_in={};{};Expires={}", String::new(), cookie_defaults, expired_date),
-        format!("alfred_id_token={};{};Expires={}", String::new(), cookie_defaults, expired_date),
-        format!("alfred_refresh_token={};{};Expires={}", String::new(), cookie_defaults, expired_date),
-        format!("alfred_token_type={};{};Expires={}", String::new(), cookie_defaults, expired_date),
-        format!("alfred_is_logged_in={};Path=/;Secure;Expires={}", "false".to_string(), expired_date)
+        format!("alfred_access_token={};{};Expires={};", String::new(), cookie_defaults, expired_date),
+        format!("alfred_expires_in={};{};Expires={};", String::new(), cookie_defaults, expired_date),
+        format!("alfred_id_token={};{};Expires={};", String::new(), cookie_defaults, expired_date),
+        format!("alfred_refresh_token={};{};Expires={};", String::new(), cookie_defaults, expired_date),
+        format!("alfred_token_type={};{};Expires={};", String::new(), cookie_defaults, expired_date),
+        format!("alfred_is_logged_in={};Path=/;Secure;Expires={};", "false".to_string(), expired_date)
       ]
     }),
     headers: None

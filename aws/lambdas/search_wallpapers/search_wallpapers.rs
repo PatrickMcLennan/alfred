@@ -9,25 +9,18 @@ use lib::repositories::*;
 use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
-struct HttpEvent {
+struct RequestEvent {
   pub body: Option<String>
 }
 
 #[derive(Serialize)]
-pub struct HttpResponseBody {
+pub struct ResponseBody {
   pub total: i32,
   pub images: Vec<DynamoImage>,
   pub message: String,
 }
 
-#[derive(Serialize)]
-#[allow(non_snake_case)]
-struct HttpResponse {
-  pub statusCode: u16,
-  pub body: String,
-}
-
-async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
+async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response> {
   let table_name = dotenv!("COLLECTOR_DYNAMODB").to_string();
 
   let body = event.payload.body.unwrap_or_default();
@@ -84,13 +77,15 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     .unwrap();
 
   if results.count <= 0 {
-    return Ok(HttpResponse {
+    return Err(Response {
       statusCode: 404,
-      body: serde_json::to_string(&HttpResponseBody {
+      body: serde_json::to_string(&ResponseBody {
         total: 0,
         message: "No items found with that criteria".to_string(),
         images: vec![]
       }).unwrap_or_default(),
+      multiValueHeaders: None,
+      headers: None
     })
   }
 
@@ -114,13 +109,15 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
     )
     .collect();
 
-  return Ok(HttpResponse {
+  return Ok(Response {
     statusCode: 200,
-    body: serde_json::to_string(&HttpResponseBody {
+    body: serde_json::to_string(&ResponseBody {
       total: results.count,
       images: formatted_items,
       message: format!("{} images found.", results.count),
-    }).unwrap_or_default()
+    }).unwrap_or_default(),
+    headers: None,
+    multiValueHeaders: None
   })
 }
 

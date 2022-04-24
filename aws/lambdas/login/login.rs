@@ -4,14 +4,8 @@ extern crate dotenv_codegen;
 use serde::{Deserialize, Serialize};
 use lambda_runtime::{LambdaEvent, Error};
 use lib::repositories::*;
+use lib::models::{Response, ResponseHeaders};
 use aws_sdk_cognitoidentityprovider::model::{AuthFlowType};
-
-#[derive(Serialize, Debug)]
-#[allow(non_snake_case)]
-pub struct MultiValueHeaders {
-  #[serde(rename(serialize = "Set-Cookie"))]
-  Set_Cookie: Vec<String>,
-}
 
 #[derive(Deserialize, Debug)]
 pub struct LoginDto {
@@ -20,52 +14,45 @@ pub struct LoginDto {
 }
 
 #[derive(Deserialize, Debug)]
-struct HttpEvent {
+struct RequestEvent {
   pub body: Option<String>
 }
 
 #[derive(Serialize)]
-pub struct HttpResponseBody {
+pub struct ResponseBody {
   pub success: bool,
   pub message: String,
   pub id_token: Option<String>
 }
 
-#[derive(Serialize)]
-#[allow(non_snake_case)]
-struct HttpResponse {
-  pub statusCode: u16,
-  pub body: String,
-  pub multiValueHeaders: Option<MultiValueHeaders>
-}
-
-async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
+async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response> {
   let user_pool_client_id = dotenv!("COLLECTOR_USER_POOL_CLIENT_ID").to_string();
-  let four_hundred = HttpResponse {
+  let four_hundred = Response {
     statusCode: 400,
-    body: serde_json::to_string(&HttpResponseBody {
+    body: serde_json::to_string(&ResponseBody {
       success: false,
       message: "incorrect params".to_string(),
       id_token: None
     }).unwrap_or_default(),
-    multiValueHeaders: None
+    multiValueHeaders: None,
+    headers: None
   };
 
   let body = event.payload.body.unwrap_or_default();
   if body.is_empty() { return Ok(four_hundred) };
   let login_dto: LoginDto = match serde_json::from_str(&body) {
     Ok(v) => v,
-    Err(_) => return Ok(four_hundred)
+    Err(_) => return Err(four_hundred)
   };
 
   let (email, password) = (
     match login_dto.email {
-      Some(v) => if v.is_empty() { return Ok(four_hundred) } else { v },
-      None => return Ok(four_hundred)
+      Some(v) => if v.is_empty() { return Err(four_hundred) } else { v },
+      None => return Err(four_hundred)
     }, 
     match login_dto.password {
-      Some(v) => if v.is_empty() { return Ok(four_hundred) } else { v },
-      None => return Ok(four_hundred)
+      Some(v) => if v.is_empty() { return Err(four_hundred) } else { v },
+      None => return Err(four_hundred)
     }
   );
 
@@ -86,14 +73,14 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
         let refresh_token = credentials.refresh_token.unwrap_or_default();
         let token_type = credentials.token_type.unwrap_or_default();
         
-        return Ok(HttpResponse {
+        return Ok(Response {
           statusCode: 200,
-          body: serde_json::to_string(&HttpResponseBody {
+          body: serde_json::to_string(&ResponseBody {
             success: true,
             message: "Logged in".to_string(),
             id_token: Some(id_token.to_string())
           }).unwrap_or_default(),
-          multiValueHeaders: Some(MultiValueHeaders {
+          multiValueHeaders: Some(ResponseHeaders {
             Set_Cookie: vec![
               format!("alfred_access_token={};httpOnly;Path=/;Secure;", access_token),
               format!("alfred_expires_in={};httpOnly;Path=/;Secure;", expires_in),
@@ -102,15 +89,17 @@ async fn handler(event: LambdaEvent<HttpEvent>) -> Result<HttpResponse, Error> {
               format!("alfred_token_type={};httpOnly;Path=/;Secure;", token_type),
               format!("alfred_is_logged_in={};Path=/;Secure;", "true".to_string())
             ]
-          })
+          }),
+          headers: None
         })
       },
       Err(e) => {
         println!("Error!  Here's the error: {}", e);
-        return Ok(HttpResponse {
+        return Err(Response {
           statusCode: 401,
           body: "Unauthorized".to_string(),
           multiValueHeaders: None,
+          headers: None
         });
       }
     }

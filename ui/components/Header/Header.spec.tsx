@@ -9,7 +9,7 @@ describe(`<Header />`, () => {
     render(
       <BrowserRouter>
         <MuiTheme>
-          <Header isLoggedIn={false} />
+          <Header />
         </MuiTheme>
       </BrowserRouter>
     )

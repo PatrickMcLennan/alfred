@@ -258,9 +258,7 @@ export class Alfred extends cdk.Stack {
      * API Routes
      */
     loginRoute.addMethod(`POST`, new api.LambdaIntegration(login));
-    logoutRoute.addMethod(`POST`, new api.LambdaIntegration(logout), {
-      authorizer,
-    });
+    logoutRoute.addMethod(`POST`, new api.LambdaIntegration(logout));
     wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers), {
       authorizer,
     });
