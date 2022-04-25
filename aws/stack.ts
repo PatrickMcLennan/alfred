@@ -148,6 +148,7 @@ export class Alfred extends cdk.Stack {
     const authApi = restApiRoot.addResource('auth');
     const wallpapersApi = restApiRoot.addResource('wallpapers');
 
+    const getWallpaperRoute = wallpapersApi.addResource('{wallpaper_sk}');
     const loginRoute = authApi.addResource('login');
     const logoutRoute = authApi.addResource('logout');
 
@@ -207,6 +208,14 @@ export class Alfred extends cdk.Stack {
       })
     );
 
+    const get_wallpaper = new lambda.Function(this, `get_wallpaper`, {
+      handler: `main`,
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      code: lambda.Code.fromAsset(path.resolve(__dirname, `./lambdas/get_wallpaper/bootstrap.zip`)),
+      functionName: `get_wallpaper`,
+      // logRetention: logs.RetentionDays.ONE_DAY,
+    });
+
     const get_wallpapers_from_source = new lambda.Function(this, `get_wallpapers_from_source`, {
       handler: `main`,
       runtime: lambda.Runtime.PROVIDED_AL2,
@@ -248,6 +257,7 @@ export class Alfred extends cdk.Stack {
     downloadWallpaperQueue.grantSendMessages(attach_blurhash);
     downloadWallpaperQueue.grantConsumeMessages(download_wallpaper_from_queue);
 
+    table.grantReadData(get_wallpaper);
     table.grantReadData(get_wallpapers_from_source);
     table.grantReadData(search_wallpapers);
     table.grantWriteData(download_wallpaper_from_queue);
@@ -257,6 +267,9 @@ export class Alfred extends cdk.Stack {
     /**
      * API Routes
      */
+    getWallpaperRoute.addMethod(`GET`, new api.LambdaIntegration(get_wallpaper), {
+      authorizer,
+    });
     loginRoute.addMethod(`POST`, new api.LambdaIntegration(login));
     logoutRoute.addMethod(`POST`, new api.LambdaIntegration(logout));
     wallpapersApi.addMethod(`POST`, new api.LambdaIntegration(search_wallpapers), {

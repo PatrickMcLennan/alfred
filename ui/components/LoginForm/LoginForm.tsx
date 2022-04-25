@@ -1,8 +1,9 @@
 import React from 'react';
-import { Button, Box, FormHelperText, FormControl, InputLabel, Input, CircularProgress, Theme } from '@mui/material';
+import { Box, FormHelperText, FormControl, InputLabel, Input, CircularProgress, Theme } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginDto, loginValidator } from '../../validators/login.validator';
+import { Button } from '../Button';
 
 type Props = {
   onSubmit: (_user: LoginDto) => unknown;
@@ -12,7 +13,11 @@ type Props = {
 
 const sx = {
   form: {
-    display: `grid`,
+    display: `flex`,
+    justifyContent: 'flex-start',
+    alignItems: 'stretch',
+    flexDirection: 'column',
+    gap: (theme: Theme) => theme.spacing(2),
   },
   formHelperText: {
     '&, & span': {
@@ -20,14 +25,9 @@ const sx = {
     },
   },
   submit: {
-    fontSize: `1.6rem`,
-    marginTop: `1.5rem`,
-    padding: `1.6rem`,
+    marginTop: (theme: Theme) => theme.spacing(4),
     backgroundColor: (theme: Theme) => theme.palette.secondary.main,
-  },
-  createLink: {
-    fontSize: `1.6rem`,
-    marginTop: `1.6rem`,
+    alignSelf: 'center',
   },
 } as const;
 
@@ -86,7 +86,7 @@ export function LoginForm({ onSubmit, disabled, loading }: Props) {
           );
         }}
       />
-      <Button disabled={loading || disabled} sx={sx.submit} type="submit">
+      <Button disabled={loading || disabled} loading={loading} sx={sx.submit} type="submit">
         {loading ? <CircularProgress /> : 'Log In'}
       </Button>
     </Box>

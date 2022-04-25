@@ -20,6 +20,10 @@ name = "download_wallpaper_from_queue"
 path = "./aws/lambdas/download_wallpaper_from_queue/download_wallpaper_from_queue.rs"
 
 [[bin]]
+name = "get_wallpaper"
+path = "./aws/lambdas/get_wallpaper/get_wallpaper.rs"
+
+[[bin]]
 name = "get_wallpapers_from_source"
 path = "./aws/lambdas/get_wallpapers_from_source/get_wallpapers_from_source.rs"
 

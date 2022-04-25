@@ -1,8 +1,11 @@
-import axios, { AxiosRequestConfig } from 'axios';
+import axios from 'axios';
+import { makeUseAxios } from 'axios-hooks';
 
 export const axiosClient = axios.create({
   baseURL: `/api`,
   withCredentials: true,
 });
 
-export const axiosFetcher = (config: AxiosRequestConfig) => axiosClient(config).then(({ data }) => data);
+export const useCustomAxios = makeUseAxios({
+  axios: axiosClient,
+});

@@ -1,0 +1,1 @@
+export { WallpaperModal } from './WallpaperModal';

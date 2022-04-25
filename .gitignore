@@ -3,6 +3,7 @@ target/
 aws/stack.js
 node_modules/
 bootstrap.zip
+yarn-error.log
 cdk.out/
 ui/dist/
 keys.json

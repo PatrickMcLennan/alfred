@@ -6,16 +6,29 @@
   padding: 0;
 }
 
+html {
+  font-size: 62.5%;
+}
+
+body, 
+#ROOT {
+  min-height: 100vh;
+  width: 100vw;
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 #ROOT {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
   align-items: stretch;
-  min-height: 100vh;
-  width: 100vw;
-  overflow-x: hidden;
 }
 
 .main {
-  flex: 1
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: stretch;
+  flex-direction: column;
 }

@@ -23,6 +23,12 @@ module.exports = {
         use: `swc-loader`,
       },
       {
+        test: /\.mjs/,
+        resolve: {
+          fullySpecified: false,
+        },
+      },
+      {
         test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
@@ -41,6 +47,6 @@ module.exports = {
     }),
   ],
   resolve: {
-    extensions: ['.js', '.jsx', '.ts', '.tsx'],
+    extensions: ['.js', '.mjs', '.jsx', '.ts', '.tsx'],
   },
 };

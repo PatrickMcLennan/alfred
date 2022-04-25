@@ -1,11 +1,21 @@
 import { useCallback, useState } from 'react';
-import { Container } from '@mui/material';
+import { Container, Theme, Typography } from '@mui/material';
 import React, { FC } from 'react';
 import { LoginDto } from '../../validators/login.validator';
 import { LoginForm } from '../../components';
 import { axiosClient } from '../../clients';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../stores';
+
+const sx = {
+  container: {
+    margin: '15vh auto 0 auto',
+    flex: 1,
+  },
+  h1: {
+    marginBottom: (theme: Theme) => theme.spacing(2),
+  },
+} as const;
 
 export const Login: FC = () => {
   const [loading, setLoading] = useState(false);
@@ -22,7 +32,7 @@ export const Login: FC = () => {
           data: user,
         }).then(() => {
           userAuthEvent(true);
-          navigate(`/`);
+          navigate(`/home`);
         });
       } catch (e) {
         console.error(e);
@@ -34,7 +44,10 @@ export const Login: FC = () => {
   );
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="sm" sx={sx.container}>
+      <Typography component="h1" sx={sx.h1} variant="h1">
+        alfred
+      </Typography>
       <LoginForm loading={loading} onSubmit={onSubmit} />
     </Container>
   );
