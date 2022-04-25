@@ -16,6 +16,10 @@ name = "authorizer"
 path = "./aws/lambdas/authorizer/authorizer.rs"
 
 [[bin]]
+name = "ignore_image_toggle"
+path = "./aws/lambdas/ignore_image_toggle/ignore_image_toggle.rs"
+
+[[bin]]
 name = "download_wallpaper_from_queue"
 path = "./aws/lambdas/download_wallpaper_from_queue/download_wallpaper_from_queue.rs"
 

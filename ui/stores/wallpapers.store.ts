@@ -7,6 +7,7 @@ type WallpaperStore = {
   total: number;
   lastFetched: Date;
 
+  removeWallpaper: (sk: string) => void;
   updateWallpapers: (newResponse: SearchWallpapersResponse) => void;
 };
 
@@ -15,6 +16,12 @@ export const useWallpapers = create<WallpaperStore>((set) => ({
   total: 0,
   wallpapers: [],
   lastFetched: new Date(),
+
+  removeWallpaper: (sk) =>
+    set((state) => ({
+      ...state,
+      wallpapers: state.wallpapers.filter((wallpaper) => wallpaper.sk !== sk),
+    })),
 
   updateWallpapers: (newResponse) =>
     set((state) => ({

@@ -7,7 +7,7 @@ use serde::Deserialize;
 use lib::{repositories::*, models::BlurhashQueueOutputItem};
 use lib::services::*;
 use std::time::SystemTime;
-use aws_sdk_dynamodb::model::{AttributeValue};
+use aws_sdk_dynamodb::model::AttributeValue;
 
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
@@ -56,6 +56,7 @@ async fn handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     .table_name(table_name)
     .item("blurhash", AttributeValue::S(metadata.blurhash))
     .item("created_at", AttributeValue::N(time_stamp.to_string()))
+    .item("ignored", AttributeValue::Bool(false))
     .item("media_type", AttributeValue::S("image".to_string()))
     .item("name", AttributeValue::S(metadata.name.to_string()))
     .item("pk", AttributeValue::S("image|widescreen_wallpaper".to_string()))

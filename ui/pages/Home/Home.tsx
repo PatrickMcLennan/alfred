@@ -16,8 +16,6 @@ export const Home: FC = () => {
     [navigate]
   );
 
-  console.log(`sk: ${sk}`);
-
   return (
     <Container maxWidth="lg">
       <WallpaperSwiper focus={toggleWallpaper} />

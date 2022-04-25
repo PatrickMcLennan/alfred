@@ -11,7 +11,8 @@
     "build:ui:prod": "webpack --config ./webpack/ui/webpack.prod.js",
     "devserver:ui": "webpack-dev-server --config ./webpack/ui/webpack.dev.js",
     "jest": "jest",
-    "jest:watch": "jest --watchAll"
+    "jest:watch": "jest --watchAll",
+    "eslint:verify": "eslint ./ui/**/*"
   },
   "devDependencies": {
     "@aws-cdk/aws-apigateway": "1.152.0",

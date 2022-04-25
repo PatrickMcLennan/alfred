@@ -55,9 +55,16 @@ async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response>
 
   if !contains.is_empty() {
     results_query = results_query
-      .set_filter_expression(Some("contains(#name, :name)".to_string()))
+      .set_filter_expression(Some("contains(#name, :name) and #ignored = :false".to_string()))
       .expression_attribute_names("#name", "name")
-      .expression_attribute_values(":name", AttributeValue::S(contains));
+      .expression_attribute_names("#ignored", "ignored")
+      .expression_attribute_values(":name", AttributeValue::S(contains))
+      .expression_attribute_values(":false", AttributeValue::Bool(false));
+    } else {
+    results_query = results_query
+      .set_filter_expression(Some("#ignored = :false".to_string()))
+      .expression_attribute_names("#ignored", "ignored")
+      .expression_attribute_values(":false", AttributeValue::Bool(false));
   }
   if limit >= 1 { 
     results_query = results_query.set_limit(Some(limit)); 

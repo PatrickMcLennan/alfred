@@ -149,6 +149,7 @@ export class Alfred extends cdk.Stack {
     const wallpapersApi = restApiRoot.addResource('wallpapers');
 
     const getWallpaperRoute = wallpapersApi.addResource('{wallpaper_sk}');
+    const ignoreWallpaperRoute = wallpapersApi.addResource('ignore');
     const loginRoute = authApi.addResource('login');
     const logoutRoute = authApi.addResource('logout');
 
@@ -224,6 +225,14 @@ export class Alfred extends cdk.Stack {
       // logRetention: logs.RetentionDays.ONE_DAY,
     });
 
+    const ignore_image_toggle = new lambda.Function(this, `ignore_image_toggle`, {
+      handler: `main`,
+      runtime: lambda.Runtime.PROVIDED_AL2,
+      code: lambda.Code.fromAsset(path.resolve(__dirname, `./lambdas/ignore_image_toggle/bootstrap.zip`)),
+      functionName: `ignore_image_toggle`,
+      // logRetention: logs.RetentionDays.ONE_DAY,
+    });
+
     const login = new lambda.Function(this, `login`, {
       handler: `main`,
       runtime: lambda.Runtime.PROVIDED_AL2,
@@ -261,13 +270,18 @@ export class Alfred extends cdk.Stack {
     table.grantReadData(get_wallpapers_from_source);
     table.grantReadData(search_wallpapers);
     table.grantWriteData(download_wallpaper_from_queue);
+    table.grantWriteData(ignore_image_toggle);
 
     wallpapersBucket.grantWrite(download_wallpaper_from_queue);
+    wallpapersBucket.grantDelete(ignore_image_toggle);
 
     /**
      * API Routes
      */
     getWallpaperRoute.addMethod(`GET`, new api.LambdaIntegration(get_wallpaper), {
+      authorizer,
+    });
+    ignoreWallpaperRoute.addMethod(`POST`, new api.LambdaIntegration(ignore_image_toggle), {
       authorizer,
     });
     loginRoute.addMethod(`POST`, new api.LambdaIntegration(login));
