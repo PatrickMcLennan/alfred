@@ -1,5 +1,5 @@
 import React, { FC, useState } from 'react';
-import { Avatar, Box, Card, CardActions, CardHeader, IconButton } from '@mui/material';
+import { Avatar, Box, Card, CardActions, CardHeader, IconButton, SxProps } from '@mui/material';
 import { Wallpaper } from '../../../lib/ts';
 import { Blurhash } from 'react-blurhash';
 import { formatRelative } from 'date-fns';
@@ -16,6 +16,13 @@ const sx = {
   active: {
     border: '1px solid white',
   },
+  card: {
+    cursor: 'grab',
+
+    '&:active': {
+      cursor: 'grabbing',
+    },
+  },
   cardActions: {
     display: 'flex',
     justifyContent: 'flex-end',
@@ -28,7 +35,7 @@ const sx = {
   },
   imageWrapper: {
     position: 'relative',
-    height: 200,
+    height: [150, 150, 250, 250, 250],
 
     '& .motion-div': {
       position: 'absolute',
@@ -49,15 +56,25 @@ const sx = {
 } as const;
 
 export const WallpaperCard: FC<Props> = ({ isActive, focus, wallpaper }) => {
+  const [activeStyles, setActiveStyles] = useState<boolean>(isActive);
   const [loaded, setLoaded] = useState<boolean>(false);
+
+  const revertStyles = () => setActiveStyles(isActive);
   return (
-    <Card variant="outlined" sx={{ ...(isActive ? sx.active : {}) }}>
+    <Card
+      variant="outlined"
+      onBlur={revertStyles}
+      onFocus={() => setActiveStyles(true)}
+      onMouseOver={() => setActiveStyles(true)}
+      onMouseLeave={revertStyles}
+      sx={{ ...sx.card, ...(activeStyles ? sx.active : {}) }}
+    >
       <CardHeader
         avatar={<Avatar>N</Avatar>}
         subheader={formatRelative(new Date(), wallpaper.created_at)}
         title={wallpaper.name}
       />
-      <Box sx={sx.imageWrapper}>
+      <Box sx={sx.imageWrapper as SxProps}>
         <Blurhash hash={wallpaper.blurhash} width={500} height={200} resolutionX={32} resolutionY={32} punch={1} />
         <motion.div
           animate={loaded ? 'loaded' : 'loading'}

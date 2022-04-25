@@ -5,7 +5,6 @@ import { LoginDto } from '../../validators/login.validator';
 import { LoginForm } from '../../components';
 import { axiosClient } from '../../clients';
 import { useNavigate } from 'react-router-dom';
-import { useUser } from '../../stores';
 
 const sx = {
   container: {
@@ -19,7 +18,6 @@ const sx = {
 
 export const Login: FC = () => {
   const [loading, setLoading] = useState(false);
-  const { userAuthEvent } = useUser();
   const navigate = useNavigate();
 
   const onSubmit = useCallback(
@@ -30,17 +28,14 @@ export const Login: FC = () => {
           method: `POST`,
           url: `/auth/login`,
           data: user,
-        }).then(() => {
-          userAuthEvent(true);
-          navigate(`/home`);
-        });
+        }).then(() => navigate(`/home`));
       } catch (e) {
         console.error(e);
       } finally {
         setLoading(false);
       }
     },
-    [navigate, userAuthEvent]
+    [navigate]
   );
 
   return (

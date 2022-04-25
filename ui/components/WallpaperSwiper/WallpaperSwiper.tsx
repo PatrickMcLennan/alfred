@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import { Pagination, A11y } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Box, Theme, Typography } from '@mui/material';
@@ -25,25 +25,23 @@ const sx = {
   },
   h2: {
     marginBottom: (theme: Theme) => theme.spacing(2),
+    paddingLeft: (theme: Theme) => theme.spacing(4),
   },
 } as const;
 
 const getSlidesPerView = (isMobile: boolean, isTablet: boolean) => {
   if (isMobile && isTablet) return 1.5;
-  if (isTablet) return 2.5;
-  return 3.5;
+  if (isTablet) return 3.5;
+  return 4.5;
 };
 
 export const WallpaperSwiper: FC<Props> = ({ focus }) => {
-  const firstRender = useRef<boolean>(true);
-  const { lastFetched, total, wallpapers, updateWallpapers } = useWallpapers(
-    ({ lastFetched, total, wallpapers, updateWallpapers }) => ({
-      lastFetched,
-      total,
-      wallpapers,
-      updateWallpapers,
-    })
-  );
+  // const firstRender = useRef<boolean>(true);
+  const { total, wallpapers, updateWallpapers } = useWallpapers(({ total, wallpapers, updateWallpapers }) => ({
+    total,
+    wallpapers,
+    updateWallpapers,
+  }));
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
@@ -66,9 +64,7 @@ export const WallpaperSwiper: FC<Props> = ({ focus }) => {
   }, [isMobile, isTablet]);
 
   useEffect(() => {
-    if (wallpapers.length <= 10 && firstRender.current) {
-      firstRender.current = false;
-      console.log(`running useEffect`);
+    if (wallpapers.length <= 10) {
       axiosClient({
         method: 'POST',
         url: '/wallpapers/',
@@ -81,7 +77,7 @@ export const WallpaperSwiper: FC<Props> = ({ focus }) => {
 
   return (
     <Box aria-label="Wallpapers" component="section" sx={sx.container}>
-      <Typography component="h2" sx={sx.h2} variant="h2">
+      <Typography component="h2" sx={sx.h2} variant="h4">
         Wallpapers
       </Typography>
       <Swiper

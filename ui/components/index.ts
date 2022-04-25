@@ -4,6 +4,7 @@ export * from './Footer';
 export * from './Header';
 export * from './LoginForm';
 export * from './Modal';
+export * from './Navbar';
 export * from './Router';
 export * from './WallpaperCard';
 export * from './WallpaperModal';

@@ -1,19 +1,26 @@
 import React, { FC, useState } from 'react';
-import { Box, Button, Container, Theme, Typography } from '@mui/material';
-import { Link, useNavigate } from 'react-router-dom';
+import { Box, IconButton, Theme } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import { axiosClient } from '../../clients';
-import { useUser } from '../../stores';
+import LogoutIcon from '@mui/icons-material/Logout';
 
 const sx = {
-  container: {
-    padding: (theme: Theme) => theme.spacing(4),
+  header: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    alignItem: 'center',
+    flexDirection: 'row',
+    padding: (theme: Theme) => theme.spacing(1, 4),
+    borderBottom: '1px solid white',
+    gridArea: 'header',
+    gridColumn: '1 / -1',
   },
 } as const;
 
 export const Header: FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
-  const { isLoggedIn, userAuthEvent } = useUser(({ isLoggedIn, userAuthEvent }) => ({ isLoggedIn, userAuthEvent }));
+  const isLoggedIn = !!document.cookie.match(/alfred_is_logged_in=true/)?.length;
 
   const logout = async () => {
     setLoading(true);
@@ -21,10 +28,7 @@ export const Header: FC = () => {
       await axiosClient({
         method: 'POST',
         url: '/auth/logout',
-      }).then(() => {
-        userAuthEvent(false);
-        navigate(`/login`);
-      });
+      }).then(() => navigate(`/login`));
     } catch (e) {
       console.error(e);
     } finally {
@@ -33,22 +37,12 @@ export const Header: FC = () => {
   };
 
   return (
-    <Container className="header" component="header" maxWidth="md" sx={sx.container}>
-      <Box>
-        {isLoggedIn && (
-          <>
-            <Typography component={Link} data-testid="wallpapers-link" to="/wallpapers">
-              Wallpapers
-            </Typography>
-            <Typography component={Link} data-testid="crypto-link" to="/crypto">
-              Crypto
-            </Typography>
-            <Typography component={Button} data-testid="logout-button" disabled={loading} onClick={logout}>
-              Logout
-            </Typography>
-          </>
-        )}
-      </Box>
-    </Container>
+    <Box className="header" component="header" sx={{ ...(isLoggedIn ? sx.header : {}) }}>
+      {isLoggedIn && (
+        <IconButton data-testid="logout-button" disabled={loading} onClick={logout}>
+          <LogoutIcon />
+        </IconButton>
+      )}
+    </Box>
   );
 };

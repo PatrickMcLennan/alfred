@@ -1,34 +1,23 @@
-import { FC, StrictMode, useRef } from 'react';
+import { FC } from 'react';
 import { Box } from '@mui/system';
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import { Header, Footer, MuiTheme, Router } from './components';
-import { useUser } from './stores';
+import { Navbar } from './components/Navbar';
 
-type Props = {
-  isLoggedIn: boolean;
-};
-
-export const App: FC<Props> = ({ isLoggedIn }) => {
-  const firstRender = useRef<boolean>(true);
-  const { userAuthEvent } = useUser(({ userAuthEvent }) => ({ userAuthEvent }));
-
-  if (firstRender.current) {
-    userAuthEvent(isLoggedIn);
-    firstRender.current = false;
-  }
-
+export const App: FC = () => {
   return (
-    <StrictMode>
-      <MuiTheme>
-        <BrowserRouter>
-          <Header />
+    <MuiTheme>
+      <BrowserRouter>
+        <Header />
+        <Box className="main-wrapper">
+          <Navbar />
           <Box className="main" component="main">
             <Router />
           </Box>
-          <Footer />
-        </BrowserRouter>
-      </MuiTheme>
-    </StrictMode>
+        </Box>
+        <Footer />
+      </BrowserRouter>
+    </MuiTheme>
   );
 };
