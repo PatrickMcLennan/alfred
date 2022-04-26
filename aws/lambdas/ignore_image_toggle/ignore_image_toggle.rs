@@ -64,22 +64,6 @@ async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response>
     };
 
   let is_ignored = ignored == true;
-  if is_ignored {
-    match S3::new()
-      .await
-      .delete_object()
-      .bucket(dotenv!("WIDESCREEN_WALLPAPERS_BUCKET_NAME").to_string())
-      .key(sk)
-      .send()
-      .await {
-        Ok(v) => v,
-        Err(e) => {
-          println!("Error deleting from bucket: {:?}", e);
-          return Err(four_hundred);
-        }
-      };
-    ()
-  }
 
   Ok(Response {
     statusCode: 204,

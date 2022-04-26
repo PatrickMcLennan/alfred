@@ -2,13 +2,8 @@ import React, { FC } from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Investments, Home, Login, Wallpapers } from '../../pages';
 
-let rerenders = 0;
-
 export const Router: FC = () => {
   const isLoggedIn = !!document.cookie.match(/alfred_is_logged_in=true/)?.length;
-
-  rerenders += 1;
-  console.log(`Router rerenders: ${rerenders}`);
 
   return (
     <Routes>

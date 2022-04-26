@@ -1,5 +1,5 @@
-import { Box, IconButton, Theme, Typography } from '@mui/material';
-import React, { FC, useState } from 'react';
+import { Box, IconButton, Theme } from '@mui/material';
+import React, { FC } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import WallpaperIcon from '@mui/icons-material/Wallpaper';
