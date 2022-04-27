@@ -105,7 +105,7 @@ export const WallpaperSwiper: FC<Props> = ({ focus }) => {
   }, [isMobile, isTablet]);
 
   useEffect(() => {
-    if (wallpapers.length <= 15) {
+    if (wallpapers.length <= 15 && !isCalling.current) {
       isCalling.current = true;
       axiosClient({
         method: 'POST',

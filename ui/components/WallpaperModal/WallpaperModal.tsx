@@ -1,4 +1,4 @@
-import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { Modal } from '../';
 import { Box, IconButton, SxProps, Theme, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -154,8 +154,8 @@ export const WallpaperModal: FC<Props> = ({ onClose }) => {
             >
               <OpenInNewIcon aria-describedby="wallpaper-modal-open-button" />
             </IconButton>
-            <IconButton sx={sx.deleteIcon} onClick={() => setShowDeleteDialog(true)}>
-              <DeleteIcon />
+            <IconButton id="wallpaper-modal-delete-button" sx={sx.deleteIcon} onClick={() => setShowDeleteDialog(true)}>
+              <DeleteIcon aria-describedby="wallpaper-modal-delete-button" />
             </IconButton>
           </Box>
         </Box>

@@ -1,7 +1,6 @@
 import React, { FC, ReactNode, useState } from 'react';
 import { Box, IconButton, Modal as MuiModal, Theme, Typography } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import Blurhash from 'react-blurhash';
 
 type Props = {
   children: ReactNode;
@@ -54,7 +53,6 @@ const sx = {
 } as const;
 
 export const Modal: FC<Props> = ({ children, open, onClose, subtitle, title }) => {
-  const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const id = `${title}-modal-title`;
   return (
     <MuiModal aria-describedby={id} open={open} onClose={onClose} sx={sx.backdrop}>

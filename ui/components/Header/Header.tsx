@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import { axiosClient } from '../../clients';
 import LogoutIcon from '@mui/icons-material/Logout';
 
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import PersonIcon from '@mui/icons-material/Person';
+
 const sx = {
   header: {
     display: 'flex',
@@ -14,6 +17,9 @@ const sx = {
     borderBottom: '1px solid white',
     gridArea: 'header',
     gridColumn: '1 / -1',
+  },
+  hide: {
+    display: 'none',
   },
 } as const;
 
@@ -37,7 +43,7 @@ export const Header: FC = () => {
   };
 
   return (
-    <Box className="header" component="header" sx={{ ...(isLoggedIn ? sx.header : {}) }}>
+    <Box className="header" component="header" sx={isLoggedIn ? sx.header : sx.hide}>
       {isLoggedIn && (
         <IconButton data-testid="logout-button" disabled={loading} onClick={logout}>
           <LogoutIcon />
