@@ -1,1 +1,0 @@
-export { WallpaperSwiper } from './WallpaperSwiper';

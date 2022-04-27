@@ -11,4 +11,5 @@ pub struct DynamoImage {
   pub thumbnail_url: String,
   pub updated_at: u64,
   pub url: String,
+  pub ignored:  bool
 }

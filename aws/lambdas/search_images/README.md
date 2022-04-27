@@ -1,8 +1,8 @@
 
-# search_wallpapers
+# search_images
 
 
-Lambda behind API Gateway accepting optional props to either search wallpapers by name or return all, paginated or otherwise.
+Lambda behind API Gateway accepting optional props to either search images by name or return all, paginated or otherwise.
 <br />
 <hr />
 <br />
@@ -56,11 +56,11 @@ struct HttpResponse {
 ## CDK Instantiation
 
 ```typescript
-const search_wallpapers = new lambda.Function(this, `search_wallpapers`, {
+const search_images = new lambda.Function(this, `search_images`, {
   handler: `main`,
   runtime: lambda.Runtime.PROVIDED_AL2,
-  code: lambda.Code.fromAsset(path.resolve(__dirname, `./lambdas/search_wallpapers/bootstrap.zip`)),
-  functionName: `search_wallpapers`,
+  code: lambda.Code.fromAsset(path.resolve(__dirname, `./lambdas/search_images/bootstrap.zip`)),
+  functionName: `search_images`,
 });
 ```
 <hr />

@@ -16,7 +16,7 @@ use uuid::Uuid;
 struct Event {}
 
 async fn handler(_: LambdaEvent<Event>) -> Result<(), Error> {
-  let endpoint: String = dotenv!("WIDESCREEN_WALLPAPERS_URL").to_string();
+  let endpoint: String = dotenv!("AMOLED_BACKGROUNDS_URL").to_string();
   let blurhash_queue_name = dotenv!("COLLECTOR_BLURHASH_QUEUE_NAME").to_string();
   let table_name = dotenv!("COLLECTOR_DYNAMODB").to_string();
 
@@ -30,7 +30,7 @@ async fn handler(_: LambdaEvent<Event>) -> Result<(), Error> {
     .iter()
     .map(|(name, _)| 
       HashMap::from([
-        ("pk".to_string(), AttributeValue::S("image|widescreen_wallpaper".to_string())),
+        ("pk".to_string(), AttributeValue::S("image|amoled_background".to_string())),
         ("sk".to_string(), AttributeValue::S(name.to_string()))
       ])
     )
@@ -76,7 +76,7 @@ async fn handler(_: LambdaEvent<Event>) -> Result<(), Error> {
           url: post.url.to_string(),
           thumbnail_url: post.thumbnail_url.to_string(),
           name: post.name.to_string(),
-          pk: "image|widescreen_wallpaper".to_string()
+          pk: "image|amoled_background".to_string()
         }
       ).unwrap_or_default();
       println!("Inserting {} into the blurhash queue now . . .", json_string);

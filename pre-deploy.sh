@@ -2,15 +2,16 @@
 
 nvm use
 
-rm aws/lambdas/authorizer/bootstrap.zip
 rm aws/lambdas/attach_blurhash/bootstrap.zip
-rm aws/lambdas/download_wallpaper_from_queue/bootstrap.zip
+rm aws/lambdas/authorizer/bootstrap.zip
+rm aws/lambdas/download_image_from_queue/bootstrap.zip
+rm aws/lambdas/get_amoled_backgrounds_from_source/bootstrap.zip
+rm aws/lambdas/get_image/bootstrap.zip
 rm aws/lambdas/get_wallpapers_from_source/bootstrap.zip
-rm aws/lambdas/get_wallpaper/bootstrap.zip
 rm aws/lambdas/ignore_image_toggle/bootstrap.zip
 rm aws/lambdas/login/bootstrap.zip
 rm aws/lambdas/logout/bootstrap.zip
-rm aws/lambdas/search_wallpapers/bootstrap.zip
+rm aws/lambdas/search_images/bootstrap.zip
 rm aws/stack.js
 
 
@@ -45,25 +46,37 @@ rm bootstrap
 
 echo
 echo " - - - "
-echo "  Creating bootstrap of download_wallpaper_from_queue . . ."
+echo "  Creating bootstrap of download_image_from_queue . . ."
 echo " - - - "
-cp target/x86_64-unknown-linux-musl/release/download_wallpaper_from_queue ./bootstrap 
+cp target/x86_64-unknown-linux-musl/release/download_image_from_queue ./bootstrap 
 echo " - - - "
-echo "  Creating zip of download_wallpaper_from_queue . . ."
+echo "  Creating zip of download_image_from_queue . . ."
 echo " - - - "
-zip ./aws/lambdas/download_wallpaper_from_queue/bootstrap.zip bootstrap     
+zip ./aws/lambdas/download_image_from_queue/bootstrap.zip bootstrap     
 
 rm bootstrap
 
 echo
 echo " - - - "
-echo "  Creating bootstrap of get_wallpaper . . ."
+echo "  Creating bootstrap of get_image . . ."
 echo " - - - "
-cp target/x86_64-unknown-linux-musl/release/get_wallpaper ./bootstrap 
+cp target/x86_64-unknown-linux-musl/release/get_image ./bootstrap 
 echo " - - - "
-echo "  Creating zip of get_wallpaper . . ."
+echo "  Creating zip of get_image . . ."
 echo " - - - "
-zip ./aws/lambdas/get_wallpaper/bootstrap.zip bootstrap     
+zip ./aws/lambdas/get_image/bootstrap.zip bootstrap     
+
+rm bootstrap
+
+echo
+echo " - - - "
+echo "  Creating bootstrap of get_amoled_backgrounds_from_source . . ."
+echo " - - - "
+cp target/x86_64-unknown-linux-musl/release/get_amoled_backgrounds_from_source ./bootstrap 
+echo " - - - "
+echo "  Creating zip of get_amoled_backgrounds_from_source . . ."
+echo " - - - "
+zip ./aws/lambdas/get_amoled_backgrounds_from_source/bootstrap.zip bootstrap     
 
 rm bootstrap
 
@@ -117,13 +130,13 @@ rm bootstrap
 
 echo
 echo " - - - "
-echo "  Creating bootstrap of search_wallpapers . . ."
+echo "  Creating bootstrap of search_images . . ."
 echo " - - - "
-cp target/x86_64-unknown-linux-musl/release/search_wallpapers ./bootstrap 
+cp target/x86_64-unknown-linux-musl/release/search_images ./bootstrap 
 echo " - - - "
-echo "  Creating zip of search_wallpapers . . ."
+echo "  Creating zip of search_images . . ."
 echo " - - - "
-zip ./aws/lambdas/search_wallpapers/bootstrap.zip bootstrap     
+zip ./aws/lambdas/search_images/bootstrap.zip bootstrap     
 
 rm bootstrap
 

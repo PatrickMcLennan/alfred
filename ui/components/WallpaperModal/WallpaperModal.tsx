@@ -2,8 +2,8 @@ import React, { FC, useEffect, useRef, useState } from 'react';
 import { Modal } from '../';
 import { Box, IconButton, SxProps, Theme, Typography } from '@mui/material';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useWallpapers } from '../../stores';
-import { Wallpaper } from '../../../lib/ts';
+import { useImages } from '../../stores';
+import { Image } from '../../../lib/ts';
 import { axiosClient } from '../../clients';
 import { formatRelative } from 'date-fns';
 import { Blurhash } from 'react-blurhash';
@@ -40,7 +40,7 @@ const sx = {
   },
   imageWrapper: {
     position: 'relative',
-    height: [200, 350, 450, 550, 550],
+    height: [200, 350, 400, 400, 400],
 
     '& .motion-div': {
       position: 'absolute',
@@ -61,9 +61,9 @@ const sx = {
 } as const;
 
 export const WallpaperModal: FC<Props> = ({ onClose }) => {
-  const { removeWallpaper, wallpapers } = useWallpapers(({ removeWallpaper, wallpapers }) => ({
+  const { removeWallpaper, widescreen_wallpapers } = useImages(({ removeWallpaper, widescreen_wallpapers }) => ({
     removeWallpaper,
-    wallpapers,
+    widescreen_wallpapers,
   }));
   const { sk } = useParams<Params>();
   const navigate = useNavigate();
@@ -71,8 +71,8 @@ export const WallpaperModal: FC<Props> = ({ onClose }) => {
   const [showDeleteDialog, setShowDeleteDialog] = useState<boolean>(false);
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const [wallpaper, setWallpaper] = useState<Wallpaper | null>(
-    wallpapers.find((wallpaper) => wallpaper.sk === sk) ?? null // TS is being weird here
+  const [wallpaper, setWallpaper] = useState<Image | null>(
+    widescreen_wallpapers.find((wallpaper) => wallpaper.sk === sk) ?? null // TS is being weird here
   );
 
   const ignoreWallpaper = async () => {

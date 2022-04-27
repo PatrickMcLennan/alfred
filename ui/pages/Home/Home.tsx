@@ -1,11 +1,17 @@
 import React, { FC, useCallback } from 'react';
 import { Box, Theme } from '@mui/material';
-import { WallpaperModal, WallpaperSwiper } from '../../components';
+import { WallpaperModal, ImageSwiper } from '../../components';
 import { Outlet, Route, Routes, useNavigate } from 'react-router-dom';
+import { ImageType } from '../../../lib/ts';
 
 const sx = {
   container: {
     padding: (theme: Theme) => theme.spacing(2),
+  },
+  swiperWrapper: {
+    '&:not(:first-of-type)': {
+      marginTop: (theme: Theme) => theme.spacing(2),
+    },
   },
 } as const;
 
@@ -19,7 +25,12 @@ export const Home: FC = () => {
 
   return (
     <Box sx={sx.container}>
-      <WallpaperSwiper focus={toggleWallpaper} />
+      <Box sx={sx.swiperWrapper}>
+        <ImageSwiper focus={toggleWallpaper} title="Widescreen Wallpapers" variant={ImageType.WIDESCREEN_WALLPAPER} />
+      </Box>
+      <Box sx={sx.swiperWrapper}>
+        <ImageSwiper focus={toggleWallpaper} title="Amoled Backgrounds" variant={ImageType.AMOLED_BACKGROUND} />
+      </Box>
       <Routes>
         <Route path="/wallpaper/:sk" element={<WallpaperModal onClose={() => toggleWallpaper()} />} />
       </Routes>

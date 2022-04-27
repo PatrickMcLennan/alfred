@@ -23,15 +23,32 @@ pub struct ResponseBody {
 async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response> {
   let table_name = dotenv!("COLLECTOR_DYNAMODB").to_string();
 
+  let four_hundred = Response {
+    statusCode: 400,
+    body: serde_json::to_string(&ResponseBody {
+      total: 0,
+      message: "Invalid params".to_string(),
+      images: vec![]
+    }).unwrap_or_default(),
+    multiValueHeaders: None,
+    headers: None
+  };
+
   let body = event.payload.body.unwrap_or_default();
 
   let dynamo_client = DynamoDB::new().await;
+
   let mut limit = 0 as i32;
   let mut start_key = String::new();
   let mut contains = String::new();
+  let mut pk = String::new();
 
   if !body.is_empty() {
     let image_search_dto: ImageSearchDto = serde_json::from_str(&body).unwrap();
+    match image_search_dto.pk {
+      Some(v) => pk = v,
+      None => ()
+    }
     match image_search_dto.contains { 
       Some(v) => contains = v, 
       None => () 
@@ -44,14 +61,19 @@ async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response>
       Some(v) => start_key = v, 
       None => () 
     };
-  };
+  } else {
+    return Err(four_hundred)
+  }
+
+  if pk.is_empty() { return Err(four_hundred) }
   
   let mut results_query = dynamo_client
     .query()
     .table_name(table_name)
     .key_condition_expression("#pk = :pk")
     .expression_attribute_names("#pk", "pk")
-    .expression_attribute_values(":pk", AttributeValue::S("image|widescreen_wallpaper".to_string()));
+    .expression_attribute_values(":pk", AttributeValue::S(pk))
+    .scan_index_forward(false);
 
   if !contains.is_empty() {
     results_query = results_query
@@ -109,6 +131,7 @@ async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response>
         name: hashmap.get("name").unwrap().as_s().unwrap().to_string(),
         pk: hashmap.get("pk").unwrap().as_s().unwrap().to_string(),
         sk: hashmap.get("sk").unwrap().as_s().unwrap().to_string(),
+        ignored: *hashmap.get("ignored").unwrap().as_bool().unwrap(),
         thumbnail_url: hashmap.get("thumbnail_url").unwrap().as_s().unwrap().to_string(),
         updated_at: hashmap.get("created_at").unwrap().as_n().unwrap().parse::<u64>().unwrap(),
         url: hashmap.get("url").unwrap().as_s().unwrap().to_string(),

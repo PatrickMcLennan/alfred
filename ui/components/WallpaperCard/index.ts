@@ -1,1 +1,0 @@
-export { WallpaperCard } from './WallpaperCard';

@@ -1,1 +1,1 @@
-export * from './wallpapers.store';
+export * from './images.store';

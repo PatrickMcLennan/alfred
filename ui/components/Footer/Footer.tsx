@@ -1,11 +1,11 @@
 import React, { FC } from 'react';
-import { Container, Theme, Typography } from '@mui/material';
+import { Box, Theme, Typography } from '@mui/material';
 
 const sx = {
   container: {
     textAlign: 'center',
     padding: (theme: Theme) => theme.spacing(2),
-    gridArea: 'footer',
+    width: '100%',
     gridColumnSpan: 2,
     borderTop: '1px solid white',
   },
@@ -18,8 +18,8 @@ const currentYear = new Date().getFullYear();
 
 export const Footer: FC = () => {
   return (
-    <Container className="footer" component="footer" data-testid="footer" maxWidth="md" sx={sx.container}>
+    <Box className="footer" component="footer" data-testid="footer" sx={sx.container}>
       <Typography sx={sx.typography}>Copyright {currentYear} Patrick McLennan</Typography>
-    </Container>
+    </Box>
   );
 };

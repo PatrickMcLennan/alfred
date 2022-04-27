@@ -54,6 +54,7 @@ async fn handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     thumbnail_url: input_item.thumbnail_url,
     name: input_item.name,
     blurhash,
+    pk: input_item.pk
   };
 
   // Stringify new metatdata with blurhash, place onto next queue, remove from calling queue

@@ -9,6 +9,7 @@ use lib::repositories::*;
 #[derive(Deserialize, Debug)]
 #[allow(non_snake_case)]
 struct DeleteImageDto {
+  pub pk: Option<String>,
   pub sk: Option<String>,
   pub ignored: Option<bool>
 }
@@ -39,6 +40,10 @@ async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response>
     Some(v) => if v.is_empty() { return Err(four_hundred) } else { v },
     None => return Err(four_hundred)
   };
+  let pk = match dto.pk {
+    Some(v) => if v.is_empty() { return Err(four_hundred) } else { v },
+    None => return Err(four_hundred)
+  };
   let ignored = match dto.ignored {
     Some(v) => v,
     None => return Err(four_hundred)
@@ -48,7 +53,7 @@ async fn handler(event: LambdaEvent<RequestEvent>) -> Result<Response, Response>
     .await
     .update_item()
     .table_name(dotenv!("COLLECTOR_DYNAMODB").to_string())
-    .key("pk", AttributeValue::S("image|widescreen_wallpaper".to_string()))
+    .key("pk", AttributeValue::S(pk.to_string()))
     .key("sk", AttributeValue::S(sk.to_string()))
     .update_expression("SET #ignored = :ignored")
     .condition_expression("attribute_exists(pk)")

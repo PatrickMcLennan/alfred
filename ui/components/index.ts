@@ -6,6 +6,6 @@ export * from './LoginForm';
 export * from './Modal';
 export * from './Navbar';
 export * from './Router';
-export * from './WallpaperCard';
+export * from './ImageCard';
 export * from './WallpaperModal';
-export * from './WallpaperSwiper';
+export * from './ImageSwiper';

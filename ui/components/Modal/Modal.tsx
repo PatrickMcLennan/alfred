@@ -43,7 +43,7 @@ const sx = {
     border: '1px solid white',
     borderRadius: '3px',
     padding: (theme: Theme) => theme.spacing(2.5),
-    width: '75vw',
+    width: '85vw',
     backgroundColor: (theme: Theme) => theme.palette.background.default,
   },
   subtitle: {

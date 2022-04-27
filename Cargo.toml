@@ -16,20 +16,24 @@ name = "authorizer"
 path = "./aws/lambdas/authorizer/authorizer.rs"
 
 [[bin]]
-name = "ignore_image_toggle"
-path = "./aws/lambdas/ignore_image_toggle/ignore_image_toggle.rs"
+name = "download_image_from_queue"
+path = "./aws/lambdas/download_image_from_queue/download_image_from_queue.rs"
 
 [[bin]]
-name = "download_wallpaper_from_queue"
-path = "./aws/lambdas/download_wallpaper_from_queue/download_wallpaper_from_queue.rs"
+name = "get_amoled_backgrounds_from_source"
+path = "./aws/lambdas/get_amoled_backgrounds_from_source/get_amoled_backgrounds_from_source.rs"
 
 [[bin]]
-name = "get_wallpaper"
-path = "./aws/lambdas/get_wallpaper/get_wallpaper.rs"
+name = "get_image"
+path = "./aws/lambdas/get_image/get_image.rs"
 
 [[bin]]
 name = "get_wallpapers_from_source"
 path = "./aws/lambdas/get_wallpapers_from_source/get_wallpapers_from_source.rs"
+
+[[bin]]
+name = "ignore_image_toggle"
+path = "./aws/lambdas/ignore_image_toggle/ignore_image_toggle.rs"
 
 [[bin]]
 name = "login"
@@ -40,8 +44,8 @@ name = "logout"
 path = "./aws/lambdas/logout/logout.rs"
 
 [[bin]]
-name = "search_wallpapers"
-path = "./aws/lambdas/search_wallpapers/search_wallpapers.rs"
+name = "search_images"
+path = "./aws/lambdas/search_images/search_images.rs"
 
 [[bin]]
 name = "widescreen_wallpapers_cli"

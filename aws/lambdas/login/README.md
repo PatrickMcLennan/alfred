@@ -1,5 +1,5 @@
 
-# search_wallpapers
+# login
 
 
 Lambda that assigns an httpsOnly JWT cookie to the callers document if Cognito approves of the credentials provided.

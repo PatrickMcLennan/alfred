@@ -1,6 +1,7 @@
-export type Wallpaper = {
+export type Image = {
   blurhash: string;
   created_at: number;
+  ignored: boolean;
   name: string;
   pk: string;
   sk: string;

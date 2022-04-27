@@ -1,15 +1,15 @@
 import React, { FC, useState } from 'react';
-import { Avatar, Box, Card, CardActionArea, CardActions, CardHeader, IconButton, SxProps } from '@mui/material';
-import { Wallpaper } from '../../../lib/ts';
+import { Avatar, Box, Card, CardActionArea, CardHeader, SxProps } from '@mui/material';
+import { Image, ImageType } from '../../../lib/ts';
 import { Blurhash } from 'react-blurhash';
 import { formatRelative } from 'date-fns';
 import { motion } from 'framer-motion';
-import ZoomInIcon from '@mui/icons-material/ZoomIn';
 
 type Props = {
   focus: (...props: any) => any;
   isActive: boolean;
-  wallpaper: Wallpaper;
+  image: Image;
+  variant: ImageType;
 };
 
 const sx = {
@@ -46,7 +46,7 @@ const sx = {
   },
   imageWrapper: {
     position: 'relative',
-    height: [150, 150, 250, 250, 250],
+    height: [150, 150, 150, 150, 150],
 
     '& .motion-div': {
       position: 'absolute',
@@ -64,9 +64,15 @@ const sx = {
       },
     },
   },
+  backgroundHeight: {
+    height: [350, 350, 350, 350, 350],
+  },
+  wallpaperHeight: {
+    height: [150, 150, 150, 150, 150],
+  },
 } as const;
 
-export const WallpaperCard: FC<Props> = ({ isActive, focus, wallpaper }) => {
+export const ImageCard: FC<Props> = ({ isActive, focus, image, variant }) => {
   const [activeStyles, setActiveStyles] = useState<boolean>(isActive);
   const [loaded, setLoaded] = useState<boolean>(false);
 
@@ -80,22 +86,29 @@ export const WallpaperCard: FC<Props> = ({ isActive, focus, wallpaper }) => {
       onMouseLeave={revertStyles}
       sx={{ ...sx.card, ...(activeStyles ? sx.active : {}) }}
     >
-      <CardActionArea onClick={() => focus(wallpaper.sk)}>
-        <Box sx={sx.imageWrapper as SxProps}>
-          <Blurhash hash={wallpaper.blurhash} width={500} height={150} resolutionX={32} resolutionY={32} punch={1} />
+      <CardActionArea onClick={() => focus(image.sk)}>
+        <Box
+          sx={
+            {
+              ...sx.imageWrapper,
+              ...(variant === ImageType.WIDESCREEN_WALLPAPER ? sx.wallpaperHeight : sx.backgroundHeight),
+            } as SxProps
+          }
+        >
+          <Blurhash hash={image.blurhash} width={500} height={150} resolutionX={32} resolutionY={32} punch={1} />
           <motion.div
             animate={loaded ? 'loaded' : 'loading'}
             className="motion-div"
             variants={{ loaded: { opacity: 1 }, loading: { opacity: 0 } }}
           >
-            <img src={wallpaper.thumbnail_url} alt={wallpaper.name} onLoad={() => setLoaded(true)} />
+            <img src={image.thumbnail_url} alt={image.name} onLoad={() => setLoaded(true)} />
           </motion.div>
         </Box>
         <CardHeader
-          avatar={<Avatar sx={sx.cardHeaderAvatar as SxProps}>N</Avatar>}
-          subheader={formatRelative(new Date(wallpaper.created_at), new Date())}
+          avatar={<Avatar sx={sx.cardHeaderAvatar as SxProps}>&#10003;</Avatar>}
+          subheader={formatRelative(new Date(image.created_at), new Date())}
           sx={sx.cardHeader as SxProps}
-          title={wallpaper.name}
+          title={image.name}
         />
       </CardActionArea>
     </Card>

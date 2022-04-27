@@ -1,7 +1,7 @@
-import { Wallpaper } from './wallpaper.model';
+import { Image } from './image.model';
 
 export type SearchWallpapersResponse = {
-  images: Wallpaper[];
+  images: Image[];
   total: number;
   message: string;
 };

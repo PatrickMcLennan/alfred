@@ -25,7 +25,7 @@ pub struct SqsEvent {
 async fn handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
   let table_name = dotenv!("COLLECTOR_DYNAMODB").to_string();
   let bucket_name = dotenv!("WIDESCREEN_WALLPAPERS_BUCKET_NAME").to_string();
-  let download_wallpaper_queue_name = dotenv!("COLLECTOR_DOWNLOAD_WALLPAPER_QUEUE_NAME").to_string();
+  let download_wallpaper_queue_name = dotenv!("COLLECTOR_DOWNLOAD_IMAGE_QUEUE_NAME").to_string();
 
   let time_stamp = SystemTime::now()
     .duration_since(SystemTime::UNIX_EPOCH)
@@ -59,7 +59,7 @@ async fn handler(event: LambdaEvent<SqsEvent>) -> Result<(), Error> {
     .item("ignored", AttributeValue::Bool(false))
     .item("media_type", AttributeValue::S("image".to_string()))
     .item("name", AttributeValue::S(metadata.name.to_string()))
-    .item("pk", AttributeValue::S("image|widescreen_wallpaper".to_string()))
+    .item("pk", AttributeValue::S(metadata.pk.to_string()))
     .item("sk", AttributeValue::S(metadata.name.to_string()))
     .item("thumbnail_url", AttributeValue::S(metadata.thumbnail_url))
     .item("updated_at", AttributeValue::N(time_stamp.to_string()))
