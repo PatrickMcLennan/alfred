@@ -5,6 +5,7 @@ import { LoginDto } from '../../validators/login.validator';
 import { LoginForm } from '../../components';
 import { axiosClient } from '../../clients';
 import { useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
 
 const sx = {
   container: {
@@ -39,11 +40,17 @@ export const Login: FC = () => {
   );
 
   return (
-    <Container maxWidth="sm" sx={sx.container}>
-      <Typography component="h1" sx={sx.h1} variant="h1">
-        alfred
-      </Typography>
-      <LoginForm loading={loading} onSubmit={onSubmit} />
-    </Container>
+    <>
+      <Helmet>
+        <title>alfred | Login</title>
+        <meta name="description" content="Log in" />
+      </Helmet>
+      <Container maxWidth="sm" sx={sx.container}>
+        <Typography component="h1" sx={sx.h1} variant="h1">
+          alfred
+        </Typography>
+        <LoginForm loading={loading} onSubmit={onSubmit} />
+      </Container>
+    </>
   );
 };

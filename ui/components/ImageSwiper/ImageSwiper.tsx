@@ -12,6 +12,8 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import { ImageType } from '../../../lib/ts';
 import { Method } from 'axios';
+import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
+import { motion } from 'framer-motion';
 
 type Props = {
   focus: (...props: any) => any;
@@ -30,11 +32,15 @@ const sx = {
       backgroundColor: 'white',
     },
   },
+  expandButton: {
+    marginRight: (theme: Theme) => theme.spacing(2),
+  },
   header: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: `center`,
-    padding: (theme: Theme) => theme.spacing(0, 4),
+    padding: (theme: Theme) => theme.spacing(0),
+    paddingRight: (theme: Theme) => theme.spacing(2),
     marginBottom: (theme: Theme) => theme.spacing(2),
   },
   iconButton: {
@@ -49,15 +55,26 @@ const sx = {
     },
   },
   navigationControls: {
-    marginRight: (theme: Theme) => theme.spacing(4),
+    marginRight: (theme: Theme) => theme.spacing(6),
+    marginLeft: 'auto',
   },
 } as const;
 
-const getSlidesPerView = (isMobile: boolean, isTablet: boolean, isDesktop: boolean) => {
-  if (isMobile && isTablet) return 1.5;
-  if (isTablet) return 2.5;
-  if (isDesktop) return 3.5;
-  return 4.5;
+const getSlidesPerView = (variant: ImageType, isMobile: boolean, isTablet: boolean, isDesktop: boolean) => {
+  switch (variant) {
+    case ImageType.AMOLED_BACKGROUND:
+      if (isMobile && isTablet) return 2.5;
+      if (isTablet) return 3.5;
+      if (isDesktop) return 4.5;
+      return 5.5;
+
+    case ImageType.WIDESCREEN_WALLPAPER:
+    default:
+      if (isMobile && isTablet) return 1.5;
+      if (isTablet) return 2.5;
+      if (isDesktop) return 3.5;
+      return 4.5;
+  }
 };
 
 export const ImageSwiper: FC<Props> = ({ focus, title, variant }) => {
@@ -75,9 +92,10 @@ export const ImageSwiper: FC<Props> = ({ focus, title, variant }) => {
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
   const isDesktop = useMediaQuery(theme.breakpoints.down('lg'));
-  const [slidesPerView, setSlidesPerView] = useState<number>(getSlidesPerView(isMobile, isTablet, isDesktop));
+  const [slidesPerView, setSlidesPerView] = useState<number>(getSlidesPerView(variant, isMobile, isTablet, isDesktop));
   const [disabledPrev, setDisabledPrev] = useState<boolean>(true);
   const [disabledNext, setDisabledNext] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState<boolean>(true);
 
   const apiConfig = useCallback(() => {
     switch (variant) {
@@ -134,9 +152,17 @@ export const ImageSwiper: FC<Props> = ({ focus, title, variant }) => {
     }
   };
 
+  const toggleExpanded = () =>
+    setIsExpanded((prevExpanded) => {
+      const newExpanded = !prevExpanded;
+      setDisabledNext(!newExpanded);
+      setDisabledPrev(!newExpanded);
+      return newExpanded;
+    });
+
   useEffect(() => {
-    setSlidesPerView(getSlidesPerView(isMobile, isTablet, isDesktop));
-  }, [isDesktop, isMobile, isTablet]);
+    setSlidesPerView(getSlidesPerView(variant, isMobile, isTablet, isDesktop));
+  }, [isDesktop, isMobile, isTablet, variant]);
 
   useEffect(() => {
     if (
@@ -157,6 +183,9 @@ export const ImageSwiper: FC<Props> = ({ focus, title, variant }) => {
   return (
     <Box aria-label="Wallpapers" component="section" sx={sx.container}>
       <Box component="header" sx={sx.header}>
+        <IconButton onClick={toggleExpanded} sx={sx.expandButton}>
+          <ExpandMoreOutlinedIcon />
+        </IconButton>
         <Typography component="h2" variant="h5">
           {title}
         </Typography>
@@ -169,27 +198,35 @@ export const ImageSwiper: FC<Props> = ({ focus, title, variant }) => {
           </IconButton>
         </Box>
       </Box>
-      <Swiper
-        controller={{ control: swiperRef.current }}
-        modules={[A11y, Controller]}
-        onSlideChange={swipeWatcher}
-        onSwiper={(swiper) => (swiperRef.current = swiper)}
-        spaceBetween={10}
-        slidesPerView={slidesPerView}
+      <motion.div
+        animate={isExpanded ? 'isExpanded' : 'notExpanded'}
+        variants={{
+          isExpanded: { height: 'auto', opacity: 1, visibility: `visible` },
+          notExpanded: { height: 0, opacity: 0, visibility: `hidden` },
+        }}
       >
-        {variant === ImageType.AMOLED_BACKGROUND &&
-          amoled_backgrounds.map((wallpaper) => (
-            <SwiperSlide key={wallpaper.sk}>
-              {({ isActive }) => <ImageCard isActive={isActive} focus={focus} image={wallpaper} variant={variant} />}
-            </SwiperSlide>
-          ))}
-        {variant === ImageType.WIDESCREEN_WALLPAPER &&
-          widescreen_wallpapers.map((wallpaper) => (
-            <SwiperSlide key={wallpaper.sk}>
-              {({ isActive }) => <ImageCard isActive={isActive} focus={focus} image={wallpaper} variant={variant} />}
-            </SwiperSlide>
-          ))}
-      </Swiper>
+        <Swiper
+          controller={{ control: swiperRef.current }}
+          modules={[A11y, Controller]}
+          onSlideChange={swipeWatcher}
+          onSwiper={(swiper) => (swiperRef.current = swiper)}
+          spaceBetween={10}
+          slidesPerView={slidesPerView}
+        >
+          {variant === ImageType.AMOLED_BACKGROUND &&
+            amoled_backgrounds.map((wallpaper) => (
+              <SwiperSlide key={wallpaper.sk}>
+                {({ isActive }) => <ImageCard isActive={isActive} focus={focus} image={wallpaper} variant={variant} />}
+              </SwiperSlide>
+            ))}
+          {variant === ImageType.WIDESCREEN_WALLPAPER &&
+            widescreen_wallpapers.map((wallpaper) => (
+              <SwiperSlide key={wallpaper.sk}>
+                {({ isActive }) => <ImageCard isActive={isActive} focus={focus} image={wallpaper} variant={variant} />}
+              </SwiperSlide>
+            ))}
+        </Swiper>
+      </motion.div>
     </Box>
   );
 };
