@@ -2,3 +2,7 @@ target/
 **/*.rs.bk
 .DS_Store
 IGN
+.terraform/
+*.tfstate
+*.tfstate.*
+tfplan
