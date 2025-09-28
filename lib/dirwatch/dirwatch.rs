@@ -1,12 +1,29 @@
 use anyhow::Result;
+use clap::Parser;
+use std::path::PathBuf;
+
 use chrono::Local;
 use crossbeam_channel::{unbounded, Receiver};
 use notify::{recommended_watcher, Event, EventKind, RecursiveMode, Watcher};
 use std::{
     collections::HashMap,
-    path::{Path, PathBuf},
+    path::Path,
     time::{Duration, Instant},
 };
+
+#[derive(Parser, Debug)]
+#[command(
+    name = "dirwatch",
+    about = "Log new entries created directly under a directory"
+)]
+struct Args {
+    /// Directory to watch (defaults to Desktop)
+    #[arg(short, long)]
+    path: Option<PathBuf>,
+    /// Debounce seconds
+    #[arg(long, default_value_t = 2)]
+    debounce_secs: u64,
+}
 
 pub fn watch_dir(path: &Path, debounce: Duration) -> Result<Receiver<(String, String)>> {
     if !path.exists() {

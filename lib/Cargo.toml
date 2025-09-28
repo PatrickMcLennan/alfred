@@ -1,11 +1,7 @@
 [package]
-name = "dirwatch"
+name = "lib"
 version = "0.1.0"
 edition = "2021"
-
-[[bin]]
-name = "dirwatch"
-path = "./dirwatch.rs"
 
 [lib]
 path = "./lib.rs"

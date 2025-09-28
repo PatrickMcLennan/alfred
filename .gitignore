@@ -6,3 +6,4 @@ IGN
 *.tfstate
 *.tfstate.*
 tfplan
+.env

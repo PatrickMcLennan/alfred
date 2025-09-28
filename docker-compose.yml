@@ -1,0 +1,13 @@
+version: "3.9"
+
+services:
+  notify_new_movie:
+    image: rust:1.86
+    working_dir: /app
+    volumes:
+      - .:/app 
+      - "${MOVIE_DIR}:/movies"
+    env_file:
+      - .env
+    command: >
+      sh -c "cargo run -p notify_new_movie -- --topic-arn $SNS_ARN"

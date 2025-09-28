@@ -2,14 +2,11 @@ use anyhow::Result;
 use aws_config::BehaviorVersion;
 use aws_sdk_sns::{types::MessageAttributeValue, Client};
 use clap::Parser;
-use std::time::Duration;
+use std::{path::PathBuf, time::Duration};
 use tokio::sync::mpsc;
 
 #[derive(Parser, Debug)]
-#[command(
-    name = "dispatch",
-    about = "Watch ~/Desktop and publish NEW events to SNS"
-)]
+#[command(name = "dispatch", about = "Watch and publish NEW events to SNS")]
 struct Args {
     /// SNS topic ARN (must match the region you use)
     #[arg(long)]
@@ -24,13 +21,33 @@ struct Args {
     debounce_secs: u64,
 }
 
+fn expand_tilde(p: &str) -> PathBuf {
+    if let Some(rest) = p.strip_prefix("~/") {
+        if let Some(home) = dirs::home_dir() {
+            return home.join(rest);
+        }
+    }
+    PathBuf::from(p)
+}
+
+fn resolve_watch_root() -> PathBuf {
+    if let Ok(val) = std::env::var("MOVIE_DIR") {
+        let pb = expand_tilde(val.trim());
+        if !pb.as_os_str().is_empty() {
+            return pb;
+        }
+    }
+    let mut home = dirs::home_dir().expect("Could not resolve home directory");
+    home.push("Desktop");
+    home
+}
+
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
 
-    // Hardcode to ~/Desktop
-    let mut root = dirs::home_dir().expect("Could not resolve home directory");
-    root.push("Desktop");
+    // Resolve watch root from env with fallback
+    let root = resolve_watch_root();
 
     // --- AWS config (fix deprecations) ---
     let mut cfg_loader = aws_config::defaults(BehaviorVersion::latest());
@@ -41,7 +58,8 @@ async fn main() -> Result<()> {
     let sns = Client::new(&cfg);
 
     // --- Dir watcher (blocking channel) -> async bridge ---
-    let rx_blocking = dirwatch::watch_dir(&root, Duration::from_secs(args.debounce_secs))?;
+    let rx_blocking =
+        lib::dirwatch::dirwatch::watch_dir(&root, Duration::from_secs(args.debounce_secs))?;
     let (tx_async, mut rx_async) = mpsc::unbounded_channel::<(String, String)>();
     std::thread::spawn(move || {
         while let Ok(ev) = rx_blocking.recv() {
@@ -50,7 +68,7 @@ async fn main() -> Result<()> {
     });
 
     println!(
-        "Dispatch watching {} → SNS topic {}",
+        "notify_new_movie watching {} → SNS topic {}",
         root.display(),
         &args.topic_arn
     );
@@ -78,10 +96,7 @@ async fn main() -> Result<()> {
                 "Published: {} ({name})",
                 out.message_id().unwrap_or("no-id")
             ),
-            Err(e) => {
-                // Print full error chain so we can see the real reason
-                eprintln!("SNS publish failed for {name}: {e:?}");
-            }
+            Err(e) => eprintln!("SNS publish failed for {name}: {e:?}"),
         }
     }
 

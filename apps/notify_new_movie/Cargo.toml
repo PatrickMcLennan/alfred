@@ -1,11 +1,11 @@
 [package]
-name = "dispatch"
+name = "notify_new_movie"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-path = "./dispatch.rs"
-name = "dispatch"
+path = "./notify_new_movie.rs"
+name = "notify_new_movie"
 
 [dependencies]
 anyhow = "1"
@@ -13,5 +13,5 @@ clap = { version = "4", features = ["derive"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 aws-config = "1"
 aws-sdk-sns = "1"
-dirwatch = { path = "../dirwatch" }
-dirs = "5"                                                          # uses your existing watch_dir
+lib = { path = "../../lib" }
+dirs = "5"
