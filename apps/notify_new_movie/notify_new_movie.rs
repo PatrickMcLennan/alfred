@@ -2,11 +2,16 @@ use anyhow::Result;
 use aws_config::BehaviorVersion;
 use aws_sdk_sns::{types::MessageAttributeValue, Client};
 use clap::Parser;
+use rand::seq::SliceRandom;
+use rand::thread_rng;
 use std::{path::PathBuf, time::Duration};
 use tokio::sync::mpsc;
 
 #[derive(Parser, Debug)]
-#[command(name = "dispatch", about = "Watch and publish NEW events to SNS")]
+#[command(
+    name = "notify_new_movie",
+    about = "Watch and publish NEW events to SNS"
+)]
 struct Args {
     /// SNS topic ARN (must match the region you use)
     #[arg(long)]
@@ -21,33 +26,12 @@ struct Args {
     debounce_secs: u64,
 }
 
-fn expand_tilde(p: &str) -> PathBuf {
-    if let Some(rest) = p.strip_prefix("~/") {
-        if let Some(home) = dirs::home_dir() {
-            return home.join(rest);
-        }
-    }
-    PathBuf::from(p)
-}
-
-fn resolve_watch_root() -> PathBuf {
-    if let Ok(val) = std::env::var("MOVIE_DIR") {
-        let pb = expand_tilde(val.trim());
-        if !pb.as_os_str().is_empty() {
-            return pb;
-        }
-    }
-    let mut home = dirs::home_dir().expect("Could not resolve home directory");
-    home.push("Desktop");
-    home
-}
-
 #[tokio::main]
 async fn main() -> Result<()> {
     let args = Args::parse();
 
     // Resolve watch root from env with fallback
-    let root = resolve_watch_root();
+    let root = PathBuf::from("/movies");
 
     // --- AWS config (fix deprecations) ---
     let mut cfg_loader = aws_config::defaults(BehaviorVersion::latest());
@@ -73,8 +57,23 @@ async fn main() -> Result<()> {
         &args.topic_arn
     );
 
-    while let Some((name, ts)) = rx_async.recv().await {
-        let msg = format!("NEW: {name}\nTime: {ts}\nPath: {}", root.display());
+    while let Some((name, _ts)) = rx_async.recv().await {
+        let phrases = [
+            "🎬 New Movie Added:",
+            "🍿 Fresh Flick:",
+            "📀 Just Landed:",
+            "🎥 Now Watching:",
+            "✨ Incoming Title:",
+            "🆕 Added to Library:",
+            "🎞️ Hot Drop:",
+            "📽️ Newly Detected:",
+            "⭐ Fresh Upload:",
+            "🎉 Surprise Addition:",
+        ];
+
+        let mut rng = thread_rng();
+        let prefix = phrases.choose(&mut rng).unwrap();
+        let msg = format!("{prefix} {name}");
 
         // Mark as Transactional (helps delivery; not strictly required)
         let sms_type = MessageAttributeValue::builder()

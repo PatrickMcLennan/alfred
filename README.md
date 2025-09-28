@@ -1,6 +1,6 @@
 # alfred
 
-I have a NAS also acts as a home server, running docker containers for things like a plex server, homeassistant, pihole, overseerr, etc. alfred is a monorepo of services and utilities that orhchestrates bespoke home automation behaviour based on these services and their usage.
+I have a NAS that also acts as a home server, running docker containers for things like a plex server, homeassistant, pihole, overseerr, etc. alfred is a monorepo of services and utilities that orhchestrates bespoke home automation behaviour based on these services and their usage.
 
 alfred integrates with AWS for specific features (SMS notifications, etc), and is otherwise a Rust monorepo utilizing cargo workspaces.
 
@@ -10,9 +10,7 @@ alfred integrates with AWS for specific features (SMS notifications, etc), and i
 
 The library of movies on my Plex server largely manages itself, new movies are added and old movies are removed automatically based on a variety of factors. This service sends me an SMS message when a new movie is added.
 
-- Rust
-- Terraform
-- AWS + SNS
+Rust | Terraform | AWS (+ SNS)
 
 ## Developing locally
 

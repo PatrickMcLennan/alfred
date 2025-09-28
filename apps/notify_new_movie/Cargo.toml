@@ -15,3 +15,4 @@ aws-config = "1"
 aws-sdk-sns = "1"
 lib = { path = "../../lib" }
 dirs = "5"
+rand = "0.8"
