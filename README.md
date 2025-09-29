@@ -24,6 +24,14 @@ Stores and batches recently watched movies via Tautulli webhooks. Sends batches 
 
 Rust | OpenAI | TMDB API
 
+## Running
+
+Fill out the `.env` (see `.env.example`) and run
+
+```bash
+docker-compose up -d;
+```
+
 ## Developing locally
 
 Development is done via running Rust code locally and using [AWS's Sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) functionality.

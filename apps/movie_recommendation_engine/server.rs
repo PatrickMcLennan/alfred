@@ -54,8 +54,7 @@ async fn tautulli(body: String) -> impl Responder {
     });
 
     let log_path = env::var("NDJSON_PATH").unwrap_or_else(|_| "/data/reco_events.ndjson".into());
-    crate::append_ndjson_and_probe_tmdb(&log_path, &record.to_string(), &reqwest::Client::new())
-        .await;
+    crate::append_event_to_ndjson(&log_path, &record.to_string());
 
     HttpResponse::Ok().finish()
 }
@@ -67,6 +66,17 @@ async fn healthz() -> impl Responder {
 
 /// Launch the Actix server. Reads `BIND_ADDR` (default `0.0.0.0:8088`).
 pub async fn run_server() -> std::io::Result<()> {
+    let ndjson_path = env::var("NDJSON_PATH")
+        .unwrap_or_else(|_| "/data/movie_recommendation_engine.ndjson".into());
+    let client = reqwest::Client::new();
+    actix_rt::spawn(async move {
+        let mut ticker = tokio::time::interval(std::time::Duration::from_secs(6 * 60 * 60)); // 6hrs
+        loop {
+            ticker.tick().await;
+            crate::generate_recommendations_for_latest_bucket(&ndjson_path, &client).await;
+        }
+    });
+
     let bind = env::var("BIND_ADDR").unwrap_or_else(|_| "0.0.0.0:8088".into());
     println!("movie_recommendation_engine up on http://{bind}");
     HttpServer::new(|| App::new().service(tautulli).service(healthz))
