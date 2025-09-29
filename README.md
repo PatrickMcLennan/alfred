@@ -1,6 +1,8 @@
 # alfred
 
-I have a NAS that also acts as a home server, running docker containers for things like a plex server, homeassistant, pihole, overseerr, etc. alfred is a monorepo of services and utilities that orhchestrates bespoke home automation behaviour based on these services and their usage.
+## my personal assistant
+
+I have a NAS that doubles as a home server. Aside from serving 60TB+ of media, it also runs several docker containers, such as a plex server, homeassistant, pihole, overseerr, etc. alfred is a monorepo of services and utilities that gives me greater observability and insight into each of these services, allowing me to perform more bespoke home automations.
 
 alfred integrates with AWS for specific features (SMS notifications, etc), and is otherwise a Rust monorepo utilizing cargo workspaces.
 

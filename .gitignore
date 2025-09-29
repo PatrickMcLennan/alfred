@@ -7,3 +7,4 @@ IGN
 *.tfstate.*
 tfplan
 .env
+ephemeral/
