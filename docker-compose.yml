@@ -10,7 +10,7 @@ services:
     env_file:
       - .env
     command: >
-      sh -c "cargo run -p notify_new_movie -- --topic-arn $SNS_ARN"
+      sh -c "cargo run -p notify_new_movie -- --topic-arn $NOTIFY_NEW_MOVIE_SNS_ARN"
 
   movie_recommendation_engine:
     image: rust:1.86
@@ -18,6 +18,8 @@ services:
     volumes:
       - .:/app
       - ./apps/movie_recommendation_engine/ephemeral:/data   
+    env_file:
+      - .env
     environment:
       BIND_ADDR: "0.0.0.0:8088"
       NDJSON_PATH: "/data/movie_recommendation_engine.ndjson"

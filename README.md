@@ -10,13 +10,23 @@ alfred integrates with AWS for specific features (SMS notifications, etc), and i
 
 ### 📲 Notify New Movie
 
-The library of movies on my Plex server largely manages itself, new movies are added and old movies are removed automatically based on a variety of factors. This service sends me an SMS message when a new movie is added.
+> _**Requires**: Plex_
+
+The library of movies on my Plex server largely manages itself, new movies are added and old movies are removed programatically based on a variety of factors. This service sends me an SMS message every time a new movie is added.
 
 Rust | Terraform | AWS (+ SNS)
 
+### Movie Recommendation engine
+
+> _**Requires**: Plex, Tautulli_
+
+Stores and batches recently watched movies via Tautulli webhooks. Sends batches to OpenAI API on a schedule to receive customized movie recommendations.
+
+Rust | OpenAI | TMDB API
+
 ## Developing locally
 
-There is no "true" local development for alfred. Development is done via running Rust code locally and using [AWS's SMS Sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) functionality.
+Development is done via running Rust code locally and using [AWS's Sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) functionality.
 
 ### 1. Set up AWS
 
@@ -32,11 +42,11 @@ terraform apply "tfplan";
 
 ### 2. Running locally
 
-Visit the AWS SNS Dashboard to get the `$SNS_ARN` from your new Topic. Then run:
+Visit the AWS SNS Dashboard to get the `$NOTIFY_NEW_MOVIE_SNS_ARN` from your new Topic. Then run:
 
 ```bash
 cargo run -p notify_new_movie -- \
-  --topic-arn $SNS_ARN
+  --topic-arn $NOTIFY_NEW_MOVIE_SNS_ARN
 ```
 
 ### Deploy
