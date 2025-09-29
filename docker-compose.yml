@@ -17,7 +17,7 @@ services:
     working_dir: /app
     volumes:
       - .:/app
-      - ./apps/movie_recommendation_engine/ephemeral:/data   
+      - ./db/movie_recommendation_engine/ephemeral:/data   
     env_file:
       - .env
     environment:
@@ -27,3 +27,19 @@ services:
       sh -c "cargo run -p movie_recommendation_engine"
     ports:
       - "8088:8088"
+
+  dashboard:
+    image: rust:1.86
+    working_dir: /app
+    volumes:
+      - .:/app
+      - ./db/movie_recommendation_engine/ephemeral:/data   
+    env_file:
+      - .env
+    environment:
+      BIND_ADDR: "0.0.0.0:8099"
+      NDJSON_PATH: "/data/movie_recommendation_engine.ndjson"
+    command: >
+      sh -c "cargo run -p dashboard"
+    ports:
+      - "8099:8099"

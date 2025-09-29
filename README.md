@@ -1,14 +1,26 @@
 # alfred
 
-## my personal assistant
+## tl;dr -- my personal assistant
 
-I have a NAS that doubles as a home server. Aside from serving 60TB+ of media, it also runs several docker containers, such as a plex server, homeassistant, pihole, overseerr, etc. alfred is a monorepo of services and utilities that gives me greater observability and insight into each of these services, allowing me to perform more bespoke home automations.
+I have a NAS that doubles as a home server. Aside from serving 60TB+ of media, it also runs several docker containers, such as a plex server, homeassistant, pihole, overseerr, etc. alfred is a monorepo of services I run that allow me to inject custom eventing and logic across each of these docker containers, allowing for bespoke home automation triggers and .
 
 alfred integrates with AWS for specific features (SMS notifications, etc), and is otherwise a Rust monorepo utilizing cargo workspaces.
 
 ## Services
 
-### 📲 Notify New Movie
+### 💹 1. Dashboard
+
+A very simple dashboard and overview of alfreds performance.
+
+### 🧠 2. Movie Recommendation engine
+
+> _**Requires**: Plex, Tautulli_, _Plex Meta Manager_
+
+Stores and batches recently watched movies via Tautulli webhooks. Sends batches to OpenAI API on a schedule to receive customized movie recommendations, storing them in a local NDJSON file (for now).
+
+Rust | OpenAI | TMDB API
+
+### 📲 3. Notify New Movie
 
 > _**Requires**: Plex_
 
@@ -16,27 +28,9 @@ The library of movies on my Plex server largely manages itself, new movies are a
 
 Rust | Terraform | AWS (+ SNS)
 
-### Movie Recommendation engine
-
-> _**Requires**: Plex, Tautulli_
-
-Stores and batches recently watched movies via Tautulli webhooks. Sends batches to OpenAI API on a schedule to receive customized movie recommendations.
-
-Rust | OpenAI | TMDB API
-
 ## Running
 
-Fill out the `.env` (see `.env.example`) and run
-
-```bash
-docker-compose up -d;
-```
-
-## Developing locally
-
-Development is done via running Rust code locally and using [AWS's Sandbox](https://docs.aws.amazon.com/sns/latest/dg/sns-sms-sandbox.html) functionality.
-
-### 1. Set up AWS
+1. Run the terraform code to set up your AWS env.
 
 ```bash
 brew install terraform awscli;
@@ -48,26 +42,11 @@ terraform plan -out=tfplan;
 terraform apply "tfplan";
 ```
 
-### 2. Running locally
-
-Visit the AWS SNS Dashboard to get the `$NOTIFY_NEW_MOVIE_SNS_ARN` from your new Topic. Then run:
-
-```bash
-cargo run -p notify_new_movie -- \
-  --topic-arn $NOTIFY_NEW_MOVIE_SNS_ARN
-```
-
-### Deploy
-
-#### 1. Run tests and compile for prod
+2. Fill out the `.env` (see `.env.example`, you'll need the ARN created with the above terraform commands)
+3. Start your docker containers
 
 ```bash
-cargo test && cargo build --release;
+docker-compose up -d;
 ```
 
-#### 2. (if applicable) Implement Terraform changes
-
-```bash
-terraform plan -out=tfplan;
-terraform apply "tfplan";
-```
+That's it! 🎉

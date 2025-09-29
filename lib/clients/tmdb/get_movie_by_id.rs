@@ -70,7 +70,7 @@ pub struct TmdbMovie {
 
 pub async fn get_movie_by_id(client: &Client, movie_id: u32) -> Result<TmdbMovie> {
     let api_key = env::var("TMDB_API_KEY")?;
-    let mut url = format!(
+    let url = format!(
         "https://api.themoviedb.org/3/movie/{}?api_key={}",
         movie_id, api_key
     );

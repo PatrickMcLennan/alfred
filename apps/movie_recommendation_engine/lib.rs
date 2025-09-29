@@ -265,7 +265,10 @@ pub async fn generate_recommendations_for_bucket(path: &str, bucket_tag: &str, c
         - All `tmdb_id` values must be integers.
         - Do **not** include any id in `watched_tmdb_ids` or duplicate any suggestion.
         - Prefer diversity across genres/years; mix obvious picks with a few surprises.
+        - **Never** recommend adult or X-rated content.
+        - Only recommend non-english movies already popular in North American culture (e.g. Bollywood, etc).
         - Keep `reason` concise and specific (theme, tone, cast, director, vibe).
+        - Mix seasonality in as well: for example, if it's September or October, recommend more horror movies, or if it's November or December, recommend more christmas movies, etc.
 
         Return only the JSON object.
         "#,

@@ -53,7 +53,7 @@ async fn tautulli(body: String) -> impl Responder {
         "raw": body,
     });
 
-    let log_path = env::var("NDJSON_PATH").unwrap_or_else(|_| "/data/reco_events.ndjson".into());
+    let log_path = env::var("NDJSON_PATH").unwrap();
     crate::append_event_to_ndjson(&log_path, &record.to_string());
 
     HttpResponse::Ok().finish()
@@ -66,8 +66,7 @@ async fn healthz() -> impl Responder {
 
 /// Launch the Actix server. Reads `BIND_ADDR` (default `0.0.0.0:8088`).
 pub async fn run_server() -> std::io::Result<()> {
-    let ndjson_path = env::var("NDJSON_PATH")
-        .unwrap_or_else(|_| "/data/movie_recommendation_engine.ndjson".into());
+    let ndjson_path = env::var("NDJSON_PATH").unwrap();
     let client = reqwest::Client::new();
     actix_rt::spawn(async move {
         let mut ticker = tokio::time::interval(std::time::Duration::from_secs(6 * 60 * 60)); // 6hrs
