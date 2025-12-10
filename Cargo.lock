@@ -1027,6 +1027,9 @@ name = "dashboard"
 version = "0.1.0"
 dependencies = [
  "actix-web",
+ "futures",
+ "once_cell",
+ "reqwest",
  "serde",
  "serde_json",
  "time",

@@ -72,7 +72,6 @@ struct RecOut {
 #[derive(serde::Deserialize, serde::Serialize)]
 struct RecItem {
     tmdb_id: u32,
-    reason: String,
 }
 
 // Helper to pull a year out of "YYYY-MM-DD"
@@ -250,24 +249,17 @@ pub async fn generate_recommendations_for_bucket(path: &str, bucket_tag: &str, c
         - watched_details: {watched_details}
 
         Task:
-        Given the user's recently watched movies, return **20** recommended movies.
+        Given the user's recently watched movies, return **20** recommended movies that are closely adjacent to what was watched (same franchise/series/spin-off, direct sequels/prequels, or clear thematic/plot-device links like time travel, AI/robots, dystopia, epic fantasy quest). Stay in the same core genres; avoid genre drift.
 
         Rules:
         - Output **exactly** this JSON shape (no extra fields):
-        {{
-            "bucket": "string",
-            "count": 10,
-            "recommendations": [
-              {{ "tmdb_id": <integer>, "reason": "short string (≤140 chars)" }},
-              ...
-            ]
-        }}
+        {{ "bucket": "string", "count": 20, "recommendations": [ {{ "tmdb_id": <integer> }}, ... ] }}
         - All `tmdb_id` values must be integers.
         - Do **not** include any id in `watched_tmdb_ids` or duplicate any suggestion.
-        - Prefer diversity across genres/years; mix obvious picks with a few surprises.
-        - **Never** recommend adult or X-rated content.
-        - Only recommend non-english movies already popular in North American culture (e.g. Bollywood, etc).
-        - Keep `reason` concise and specific (theme, tone, cast, director, vibe).
+        - Stay within the watched genres (sci-fi/action/fantasy here); exclude romance/holiday/family drama/war/western unless those genres appear in the watched list. Avoid adult or X-rated content. Avoid broad comedy picks unless they are explicitly in the same franchise.
+        - Prefer well-rated, recognizable titles (vote_avg ≥ 6.5 when possible).
+        - Do not add explanations or claims about franchise/universe/characters. Omit any reason text.
+        - Prefer diversity across years but keep genre/tone alignment; mix obvious franchise-adjacent picks with a few close surprises.
         - Mix seasonality in as well: for example, if it's September or October, recommend more horror movies, or if it's November or December, recommend more christmas movies, etc.
 
         Return only the JSON object.
@@ -295,9 +287,25 @@ pub async fn generate_recommendations_for_bucket(path: &str, bucket_tag: &str, c
                             rec_out.bucket
                         );
                     }
+                    // Enforce no watched or duplicate ids even if the model errs.
+                    let watched: std::collections::HashSet<u32> = ids.iter().copied().collect();
+                    let mut seen: std::collections::HashSet<u32> = std::collections::HashSet::new();
+                    let orig_len = rec_out.recommendations.len();
+                    let filtered: Vec<RecItem> = rec_out
+                        .recommendations
+                        .into_iter()
+                        .filter(|r| !watched.contains(&r.tmdb_id))
+                        .filter(|r| seen.insert(r.tmdb_id))
+                        .collect();
+                    if filtered.len() < orig_len {
+                        log::info!(
+                            "Filtered out {} watched/duplicate recs (kept {}).",
+                            orig_len - filtered.len(),
+                            filtered.len()
+                        );
+                    }
                     // Overwrite recommendations
-                    let rec_val = serde_json::to_value(&rec_out.recommendations)
-                        .unwrap_or(serde_json::json!([]));
+                    let rec_val = serde_json::to_value(&filtered).unwrap_or(serde_json::json!([]));
                     mut_bucket["recommendations"] = rec_val;
                     mut_bucket["recommendations_generated_at"] = serde_json::json!(now_iso);
 
